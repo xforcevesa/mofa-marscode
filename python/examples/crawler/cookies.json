@@ -1,0 +1,1 @@
+[{"name": "_t", "value": "7tNHsnDRJLLsHeGzVVEbpkjxRB7FB50KSaQAVzKVOac=", "domain": "passport.jd.com", "path": "/", "expires": -1, "httpOnly": false, "secure": false, "sameSite": "Lax"}, {"name": "JSESSIONID", "value": "74DD31F31D3F2C3ECBE15758B1AC50F8.s1", "domain": "seq.jd.com", "path": "/", "expires": -1, "httpOnly": true, "secure": false, "sameSite": "Lax"}]
