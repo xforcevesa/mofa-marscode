@@ -20,8 +20,8 @@ setup(
     name='mofa', 
     author="mofa",
     author_email='cheng.chen@.net',
-    # python_requires='>=3.10',
-    python_requires='>=3.8',
+    python_requires='>=3.10',
+    # python_requires='>=3.8',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
