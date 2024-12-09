@@ -1,3 +1,7 @@
+"""
+我发现bestbuy没有真人验证，可以先用登陆login页的方式实现调试，以便开发
+
+"""
 import undetected_chromedriver as uc
 import time
 import random
