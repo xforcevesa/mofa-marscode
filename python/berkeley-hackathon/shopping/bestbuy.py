@@ -266,11 +266,11 @@ def use_llm_return_json(llm_client, prompt: str, format_class, supplement_prompt
     return response.choices[0].message.parsed
 
 if __name__ == '__main__':
-    search_text = 'laptop'
+    search_text = 'mac mini m4'
     html_source = login_bestbuy(search_text=search_text)
     clean_html_source = clean_html_js_and_style(html_source)
     # HACK 
-    api_key = "your_openai_api_key"
+    api_key = "sk-"
     client = OpenAI(api_key=api_key)
     result = process_large_html_content(html_content=clean_html_source, llm_client=client, search_text=search_text)
     print(result)
