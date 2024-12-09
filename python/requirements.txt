@@ -81,7 +81,7 @@ dspy-ai==2.5.3
 mem0ai==0.1.17
 
 # --------- distributed --------- #
-dora-rs==0.3.6
+dora-rs
 
 # --------- stock --------- #
 yfinance==0.2.44
