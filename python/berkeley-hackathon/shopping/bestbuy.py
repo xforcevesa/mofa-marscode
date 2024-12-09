@@ -11,10 +11,10 @@ from typing import List
 from openai import OpenAI
 from pydantic import BaseModel
 import os
-import requests
 import json
+from dotenv import load_dotenv
 
-# HACK: assume that there is a cookie file
+load_dotenv('.env.secret')
 COOKIE_FILE = 'www.bestbuy.com.json'
 
 class Product(BaseModel):
@@ -26,7 +26,6 @@ class Product(BaseModel):
 class BestBuySearchText(BaseModel):
     products: List[Product] = None
 
-    # load cookie file
 def add_driver_cookies(driver, cookie_file_path):
     if os.path.exists(cookie_file_path):
         with open(cookie_file_path, 'r') as f:
@@ -43,12 +42,6 @@ def login_bestbuy(search_text: str, url: str = 'https://www.bestbuy.com/'):
     print("Waiting for user to click")
     time.sleep(random.choice([1, 6]))
 
-    # choose America
-    WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, 'body > div.page-container > div > div > div > div:nth-child(1) > div.country-selection > a.us-link > img'))
-    ).click()
-
-    # waiting for search box load compelete
     search_box = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, 'gh-search-input'))
     )
@@ -66,8 +59,6 @@ def clean_html_js_and_style(html_content: str) -> str:
     clean_html = str(soup)
     return clean_html
 
-
-# HACK
 def estimate_tokens(content, model='gpt-4'):
     encoding = tiktoken.encoding_for_model(model)
     return len(encoding.encode(content))
@@ -266,11 +257,10 @@ def use_llm_return_json(llm_client, prompt: str, format_class, supplement_prompt
     return response.choices[0].message.parsed
 
 if __name__ == '__main__':
-    search_text = 'mac mini m4'
+    search_text = 'laptop'
     html_source = login_bestbuy(search_text=search_text)
     clean_html_source = clean_html_js_and_style(html_source)
-    # HACK 
-    api_key = "sk-"
+    api_key = os.getenv('OPENAI_API_KEY')
     client = OpenAI(api_key=api_key)
     result = process_large_html_content(html_content=clean_html_source, llm_client=client, search_text=search_text)
     print(result)
