@@ -128,7 +128,7 @@ This is a task that needs to be decomposed :
 """
     if user_suggestions is not None:
         prompt += f"/n User's Suggestions and Preferences : {user_suggestions}"
-    return
+    return prompt
 
 def shopping_plan_validator_prompt(product_data:str, product_plan:str):
     prompt = f"""

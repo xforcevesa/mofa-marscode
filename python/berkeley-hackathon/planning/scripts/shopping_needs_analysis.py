@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from mofa.utils.ai.conn import create_openai_client, generate_json_from_llm
 from pydantic import BaseModel,Field, HttpUrl
@@ -32,7 +32,7 @@ class SellerInfo(BaseModel):
     Seller_Name: str = Field(description="Name of the seller or store")
     Seller_Rating: float = Field(description="Seller rating out of 5")
     Seller_Location: str = Field(description="Location of the seller")
-    Seller_Store_Link: Optional[HttpUrl] = Field(default=None, description="URL to the seller's store or profile")
+    Seller_Store_Link: Optional[HttpUrl] = Field( description="URL to the seller's store or profile")
 
 
 class WarrantyInfo(BaseModel):
@@ -61,7 +61,7 @@ class SingleProductDetail(BaseModel):
     Product_Name: str = Field(description="Full name of the product")
     Specifications: str = Field(description="Detailed specifications of the product")
     Price: float = Field(description="Price of the product in ¥")
-    Currency: str = Field(default="¥", description="Currency of the price")
+    Currency: str = Field( description="Currency of the price")
     Availability: str = Field(description="Availability status (e.g., 'In Stock', 'Out of Stock')")
     Product_Link: HttpUrl = Field(description="Direct URL to purchase the product")
     Seller: SellerInfo = Field(description="Information about the seller")
@@ -70,10 +70,10 @@ class SingleProductDetail(BaseModel):
     Return_Policy: ReturnPolicy = Field(description="Return policy for the product")
     Reviews: List[UserReview] = Field(description="List of user reviews and ratings")
     Images: List[HttpUrl] = Field(description="URLs to product images")
-    Discounts: Optional[str] = Field(default=None, description="Any applicable discounts or promotions")
-    Energy_Efficiency_Rating: Optional[str] = Field(default=None, description="Energy efficiency rating (e.g., 80 Plus Gold)")
-    Aesthetic_Details: Optional[str] = Field(default=None, description="Design and aesthetic details (e.g., RGB lighting)")
-    Justification: Optional[str] = Field(default=None, description="Reason for selecting this product based on user requirements")
+    Discounts: Optional[str] = Field( description="Any applicable discounts or promotions")
+    Energy_Efficiency_Rating: Optional[str] = Field( description="Energy efficiency rating (e.g., 80 Plus Gold)")
+    Aesthetic_Details: Optional[str] = Field( description="Design and aesthetic details (e.g., RGB lighting)")
+    Justification: Optional[str] = Field( description="Reason for selecting this product based on user requirements")
 
 
 class ValidationIssue(BaseModel):
@@ -84,20 +84,33 @@ class ValidationIssue(BaseModel):
 
 class ShoppingPlanEvaluation(BaseModel):
     Validation_Status: str = Field(description="Overall validation status (e.g., 'Valid', 'Issues Detected')")
-    Issues: Optional[List[ValidationIssue]] = Field(default=None, description="List of detected issues, if any.")
-    Recommendations: Optional[List[str]] = Field(default=None, description="List of recommendations to optimize the plan.")
+    Issues: Optional[List[ValidationIssue]] = Field( description="List of detected issues, if any.")
+    Recommendations: Optional[List[str]] = Field( description="List of recommendations to optimize the plan.")
 
 
 class ShoppingPlanSolution(BaseModel):
     Plan_ID: str = Field(description="Unique identifier for the shopping plan (e.g., 'Plan 1')")
     Products: List[SingleProductDetail] = Field(description="List of all selected products in the plan.")
     Total_Cost: float = Field(description="Total cost of all products in the plan.")
-    ShoppingPlanEvaluation: ShoppingPlanEvaluation = Field(description="Validation results and recommendations for the plan.")
+    Shopping_Plan_Evaluation: ShoppingPlanEvaluation = Field(description="Validation results and recommendations for the plan.")
 
 
 class ShoppingPlanSolutions(BaseModel):
     Plans: List[ShoppingPlanSolution] = Field(description="List of all generated shopping plans.")
 
+
+def extract_web_search_text_by_product_type(shopping_plan: ShoppingPlan) -> Dict[str, List[str]]:
+    result = {}
+
+    # 遍历每个ShoppingTypeNeed和其ProductInfos
+    for shopping_type in shopping_plan.Shopping_Needs:
+        for product in shopping_type.Product_Infos:
+            # 如果Product_Type已经是字典中的键，添加Web_Shopping_Search_Text到该键的列表
+            if shopping_type.Product_Type not in result:
+                result[shopping_type.Product_Type] = []
+            result[shopping_type.Product_Type].append(product.Web_Shopping_Search_Text)
+
+    return result
 
 def analyze_shopping_needs(shopping_requirements:str=None,format_class=ShoppingPlan,messages:List[dict]=None,user_suggestions:str=None,model_name:str='gpt-4o',):
     if messages is None:
