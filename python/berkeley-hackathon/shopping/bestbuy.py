@@ -1,6 +1,3 @@
-"""
-我发现bestbuy没有真人验证，可以先用登陆login页的方式实现调试，以便开发
-"""
 import undetected_chromedriver as uc
 import time
 import random
@@ -9,261 +6,116 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-import tiktoken
-from typing import List
-from openai import OpenAI
-from pydantic import BaseModel
-import os
+from typing import List, Dict
 import json
-from dotenv import load_dotenv
 
-load_dotenv('.env.secret')
-COOKIE_FILE = 'www.bestbuy.com.json'
-
-class Product(BaseModel):
-    name: str = None
-    price: str = None
-    description: str = None
-    image_url: str = None
-
-class BestBuySearchText(BaseModel):
-    products: List[Product] = None
-
-def add_driver_cookies(driver, cookie_file_path):
-    if os.path.exists(cookie_file_path):
-        with open(cookie_file_path, 'r') as f:
-            cookies = json.load(f)
-            for cookie in cookies:
-                driver.add_cookie(cookie)
-    return driver
-
-def login_bestbuy(search_text: str, url: str = 'https://www.bestbuy.com/'):
+def search_bestbuy(search_text: str, url: str = 'https://www.bestbuy.com/'):
+    """
+    使用 Selenium 模拟用户在 BestBuy 网站上搜索产品，并返回搜索结果页面的 HTML 源代码。
+    """
     driver = uc.Chrome(headless=False, use_subprocess=False)
     driver.get(url)
-    driver = add_driver_cookies(driver=driver, cookie_file_path=COOKIE_FILE)
-    driver.refresh()
     print("Waiting for user to click")
     time.sleep(random.choice([1, 6]))
 
-    search_box = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, 'gh-search-input'))
-    )
-    search_box.send_keys(search_text + Keys.RETURN)
+    try:
+        # 选择 America
+        WebDriverWait(driver, 15).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, 'body > div.page-container > div > div > div > div:nth-child(1) > div.country-selection > a.us-link > img'))
+        ).click()
 
-    time.sleep(random.choice([1, 4]))
-    html_source = driver.page_source
-    driver.close()
-    return html_source
+        # 等待搜索框加载
+        search_box = WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.ID, 'gh-search-input'))
+        )
+        search_box.send_keys(search_text)  # 输入搜索关键词
 
-def clean_html_js_and_style(html_content: str) -> str:
+        # 点击搜索按钮
+        search_button = WebDriverWait(driver, 15).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, '.header-search-icon > svg:nth-child(1)'))
+        )
+        search_button.click()
+
+        # 增加等待时间
+        time.sleep(20)  # 增加等待时间，确保页面完全加载
+
+        # 打印当前页面的 URL
+        print("Current URL after search:", driver.current_url)
+
+        # 获取页面源代码
+        html_source = driver.page_source
+        print("Page source retrieved successfully.")
+
+    except Exception as e:
+        # 捕获完整的错误信息
+        print("Error occurred:", e)
+        print("Error message:", e.msg if hasattr(e, 'msg') else "No detailed message available")
+        print("Current URL:", driver.current_url)  # 打印当前页面的 URL
+        print("Page source:", driver.page_source)  # 打印页面源代码
+        html_source = None
+
+    finally:
+        driver.close()
+        return html_source
+
+def extract_product_info(html_content: str) -> List[Dict]:
+    """
+    从 HTML 内容中提取产品信息，并保存为 JSON 格式。
+    """
     soup = BeautifulSoup(html_content, 'html.parser')
-    for tag in soup(['script', 'style']):
-        tag.decompose()
-    clean_html = str(soup)
-    return clean_html
+    products = []
 
-def estimate_tokens(content, model='gpt-4'):
-    encoding = tiktoken.encoding_for_model(model)
-    return len(encoding.encode(content))
+    # 查找所有产品项
+    product_items = soup.select('#shop-sku-list-item-49989714')
 
-def split_html_content(html_content, max_tokens_per_chunk, model='gpt-4'):
-    encoding = tiktoken.encoding_for_model(model)
-    soup = BeautifulSoup(html_content, 'html.parser')
+    for item in product_items:
+        product = {}
 
-    chunks = []
-    current_chunk = ''
-    current_tokens = 0
+        # 提取 description
+        description_tag = item.select_one(
+            'div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > h4:nth-child(2) > a:nth-child(1)'
+        )
+        if description_tag:
+            product['description'] = description_tag.text.strip()
 
-    def process_node(node):
-        nonlocal current_chunk, current_tokens, chunks
+        # 提取 model 和 value
+        model_info = {}
+        model_tags = item.select(
+            'div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > span'
+        )
+        if len(model_tags) >= 2:
+            model_info[model_tags[0].text.strip()] = model_tags[1].text.strip()
+        product['model'] = model_info
 
-        if isinstance(node, NavigableString):
-            text = str(node)
-            tokens = len(encoding.encode(text))
+        # 提取 price
+        price_tag = soup.select_one(
+            '#pricing-price-64676021 > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > span:nth-child(1)'
+        )
+        if price_tag:
+            product['price'] = price_tag.text.strip()
 
-            if current_tokens + tokens > max_tokens_per_chunk:
-                if current_chunk.strip():
-                    chunks.append(current_chunk)
-                current_chunk = ''
-                current_tokens = 0
+        products.append(product)
 
-            current_chunk += text
-            current_tokens += tokens
+    return products
 
-        elif isinstance(node, Tag):
-            start_tag = f'<{node.name}'
-            for attr, value in node.attrs.items():
-                if isinstance(value, list):
-                    value = ' '.join(value)
-                start_tag += f' {attr}="{value}"'
-            start_tag += '>'
-            end_tag = f'</{node.name}>'
+def split_html_content(html_content: str) -> List[Dict]:
+    """
+    处理 HTML 内容，提取产品信息并返回 JSON 格式的数据。
+    """
+    # 提取产品信息
+    products = extract_product_info(html_content)
 
-            start_tag_tokens = len(encoding.encode(start_tag))
-            end_tag_tokens = len(encoding.encode(end_tag))
+    # 返回 JSON 格式的数据
+    return products
 
-            prev_chunk = current_chunk
-            prev_tokens = current_tokens
-
-            if current_tokens + start_tag_tokens > max_tokens_per_chunk:
-                if current_chunk.strip():
-                    chunks.append(current_chunk)
-                current_chunk = ''
-                current_tokens = 0
-
-            current_chunk += start_tag
-            current_tokens += start_tag_tokens
-
-            for child in node.contents:
-                process_node(child)
-
-            if current_tokens + end_tag_tokens > max_tokens_per_chunk:
-                if current_chunk.strip():
-                    current_chunk += end_tag
-                    chunks.append(current_chunk)
-                else:
-                    current_chunk = start_tag + end_tag
-                    chunks.append(current_chunk)
-                current_chunk = ''
-                current_tokens = 0
-            else:
-                current_chunk += end_tag
-                current_tokens += end_tag_tokens
-
-    root = soup.body if soup.body else soup
-    for element in root.contents:
-        process_node(element)
-
-    if current_chunk.strip():
-        chunks.append(current_chunk)
-
-    return chunks
-
-def process_large_html_content(llm_client, html_content: str, search_text: str = '', max_total_tokens=128000, model='gpt-4'):
-    total_tokens = estimate_tokens(html_content, model=model)
-
-    if total_tokens <= max_total_tokens:
-        prompt = f"""Backstory:
-            You are interacting with an HTML webpage that displays content resulting from a keyword search. The webpage contains various pieces of main content that need to be extracted and utilized.
-
-            Objective:
-
-            To extract all the main content from the current HTML webpage in the exact order it appears, and display it accordingly.
-
-            Specifics:
-
-            The content originates from a search result for a specific keyword.
-            All main content elements such as text, images, and links should be included.
-            The original order of content on the webpage must be preserved.
-            Exclude any irrelevant elements like advertisements or navigation menus.
-            Tasks:
-
-            Analyze the HTML structure of the webpage.
-            Identify and extract all main content elements.
-            Organize the extracted content in the sequence it appears on the page.
-            Prepare the content for display or further processing.
-            Actions:
-
-            Parse the HTML document to access the DOM structure.
-            Locate the containers or elements that hold the main content.
-            Extract the text, images, and links from these elements.
-            Maintain the sequence by organizing content as per their order in the HTML.
-            Format the extracted content for clear presentation.
-            Results:
-
-            A compiled list of all main content from the webpage, organized sequentially.
-            The content is ready for display or can be used for additional processing tasks.
-            The extracted data accurately reflects the information presented on the webpage after the keyword search. 
-
-            This is Html source {html_content}
-
-            Search Keyword: {search_text}
-            """
-        response = use_llm_return_json(llm_client=llm_client, prompt=prompt, format_class=BestBuySearchText)
-        print("处理内容未超出 token 限制。")
-        return response
-    else:
-        print("内容超出 token 限制，正在拆分为多个块。")
-        max_tokens_per_chunk = max_total_tokens - 10000
-        chunks = split_html_content(html_content, max_tokens_per_chunk, model=model)
-        result = []
-        for i in chunks:
-            prompt = f"""Backstory:
-                        You are interacting with an HTML webpage that displays content resulting from a keyword search. The webpage contains various pieces of main content that need to be extracted and utilized.
-
-                        Objective:
-
-                        To extract all the main content from the current HTML webpage in the exact order it appears, and display it accordingly.
-
-                        Specifics:
-
-                        The content originates from a search result for a specific keyword.
-                        All main content elements such as text, images, and links should be included.
-                        The original order of content on the webpage must be preserved.
-                        Exclude any irrelevant elements like advertisements or navigation menus.
-                        Tasks:
-
-                        Analyze the HTML structure of the webpage.
-                        Identify and extract all main content elements.
-                        Organize the extracted content in the sequence it appears on the page.
-                        Prepare the content for display or further processing.
-                        Actions:
-
-                        Parse the HTML document to access the DOM structure.
-                        Locate the containers or elements that hold the main content.
-                        Extract the text, images, and links from these elements.
-                        Maintain the sequence by organizing content as per their order in the HTML.
-                        Format the extracted content for clear presentation.
-                        Results:
-
-                        A compiled list of all main content from the webpage, organized sequentially.
-                        The content is ready for display or can be used for additional processing tasks.
-                        The extracted data accurately reflects the information presented on the webpage after the keyword search. 
-
-                        This is Html source {i}
-
-                        Search Keyword: {search_text}
-                        """
-            response = use_llm_return_json(llm_client=llm_client, prompt=prompt, format_class=BestBuySearchText)
-            result.append(response)
-
-        return result
-
-def use_llm_return_json(llm_client, prompt: str, format_class, supplement_prompt: str = None,
-                        model_name: str = 'gpt-4', image_data: str = None) -> str:
-    prompt_data = [
-        {
-            "type": "text",
-            "text": prompt
-        },
-    ]
-
-    if image_data is not None:
-        prompt_data.append({
-            "type": "image_url",
-            "image_url": {
-                "url": f"data:image/jpeg;base64,{image_data}"
-            }
-        })
-
-    response = llm_client.beta.chat.completions.parse(
-        model=model_name,
-        messages=[
-                        {
-                            "role": "user",
-                            "content": prompt_data
-                        }
-                    ],
-        response_format=format_class,
-
-    )
-    return response.choices[0].message.parsed
-
+# 主函数
 if __name__ == '__main__':
-    search_text = 'laptop'
-    html_source = login_bestbuy(search_text=search_text)
-    clean_html_source = clean_html_js_and_style(html_source)
-    api_key = os.getenv('OPENAI_API_KEY')
-    client = OpenAI(api_key=api_key)
-    result = process_large_html_content(html_content=clean_html_source, llm_client=client, search_text=search_text)
-    print(result)
+    search_text = 'laptop'  # 搜索关键词
+    html_source = search_bestbuy(search_text=search_text)
+
+    if html_source:
+        # 处理 HTML 内容
+        result = split_html_content(html_source)
+        print(json.dumps(result, indent=4))
+    else:
+        print("Failed to retrieve HTML source.")
