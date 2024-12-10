@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Optional
 
 from mofa.utils.ai.conn import create_openai_client, generate_json_from_llm
-from pydantic import BaseModel,Field
+from pydantic import BaseModel,Field, HttpUrl
 from prompt import think_base_prompt,load_shopping_needs_decomposition
 
 class SingleShoppingTypeNeed(BaseModel):
@@ -19,7 +19,87 @@ class ShoppingPlan(BaseModel):
     Shopping_Needs:List[SingleShoppingTypeNeeds]
 
 
-def analyze_shopping_needs(shopping_requirements:str,messages:List[dict]=None,user_suggestions:str=None,model_name:str='gpt-4o'):
+
+
+class ShippingOption(BaseModel):
+    Method: str = Field(description="Shipping method (e.g., Standard, Express)")
+    Cost: float = Field(description="Shipping cost in ¥")
+    Estimated_Delivery_Time: str = Field(description="Estimated delivery time (e.g., 3-5 business days)")
+    Carrier: str = Field(description="Shipping carrier (e.g., DHL, FedEx)")
+
+
+class SellerInfo(BaseModel):
+    Seller_Name: str = Field(description="Name of the seller or store")
+    Seller_Rating: float = Field(description="Seller rating out of 5")
+    Seller_Location: str = Field(description="Location of the seller")
+    Seller_Store_Link: Optional[HttpUrl] = Field(default=None, description="URL to the seller's store or profile")
+
+
+class WarrantyInfo(BaseModel):
+    Duration: str = Field(description="Warranty duration (e.g., 2 years)")
+    Coverage: str = Field(description="Warranty coverage details (e.g., parts and labor)")
+    Provider: str = Field(description="Warranty provider (e.g., manufacturer, third-party)")
+
+
+class ReturnPolicy(BaseModel):
+    Policy_Details: str = Field(description="Details of the return policy")
+    Return_Window: str = Field(description="Timeframe for returns (e.g., 30 days)")
+    Conditions: str = Field(description="Conditions for returns (e.g., unopened, original packaging)")
+
+
+class UserReview(BaseModel):
+    Reviewer_Name: str = Field(description="Name or alias of the reviewer")
+    Rating: float = Field(description="Rating out of 5")
+    Comment: str = Field(description="Review comment")
+    Review_Date: str = Field(description="Date of the review")
+
+
+class SingleProductDetail(BaseModel):
+    Product_Type: str = Field(description="Type of Product (e.g., CPU, GPU, Motherboard)")
+    Brand: str = Field(description="Brand of the product (e.g., Intel, AMD)")
+    Model: str = Field(description="Model of the product (e.g., i7-12700K, Ryzen 7 5800X)")
+    Product_Name: str = Field(description="Full name of the product")
+    Specifications: str = Field(description="Detailed specifications of the product")
+    Price: float = Field(description="Price of the product in ¥")
+    Currency: str = Field(default="¥", description="Currency of the price")
+    Availability: str = Field(description="Availability status (e.g., 'In Stock', 'Out of Stock')")
+    Product_Link: HttpUrl = Field(description="Direct URL to purchase the product")
+    Seller: SellerInfo = Field(description="Information about the seller")
+    Shipping_Options: List[ShippingOption] = Field(description="Available shipping options for the product")
+    Warranty: WarrantyInfo = Field(description="Warranty details for the product")
+    Return_Policy: ReturnPolicy = Field(description="Return policy for the product")
+    Reviews: List[UserReview] = Field(description="List of user reviews and ratings")
+    Images: List[HttpUrl] = Field(description="URLs to product images")
+    Discounts: Optional[str] = Field(default=None, description="Any applicable discounts or promotions")
+    Energy_Efficiency_Rating: Optional[str] = Field(default=None, description="Energy efficiency rating (e.g., 80 Plus Gold)")
+    Aesthetic_Details: Optional[str] = Field(default=None, description="Design and aesthetic details (e.g., RGB lighting)")
+    Justification: Optional[str] = Field(default=None, description="Reason for selecting this product based on user requirements")
+
+
+class ValidationIssue(BaseModel):
+    Issue_Type: str = Field(description="Type of Issue (e.g., Budget Exceeded, Compatibility Problem)")
+    Description: str = Field(description="Detailed description of the issue.")
+    Recommendation: str = Field(description="Suggested action to resolve the issue.")
+
+
+class ShoppingPlanEvaluation(BaseModel):
+    Validation_Status: str = Field(description="Overall validation status (e.g., 'Valid', 'Issues Detected')")
+    Issues: Optional[List[ValidationIssue]] = Field(default=None, description="List of detected issues, if any.")
+    Recommendations: Optional[List[str]] = Field(default=None, description="List of recommendations to optimize the plan.")
+
+
+class ShoppingPlanSolution(BaseModel):
+    Plan_ID: str = Field(description="Unique identifier for the shopping plan (e.g., 'Plan 1')")
+    Products: List[SingleProductDetail] = Field(description="List of all selected products in the plan.")
+    Total_Cost: float = Field(description="Total cost of all products in the plan.")
+    ShoppingPlanEvaluation: ShoppingPlanEvaluation = Field(description="Validation results and recommendations for the plan.")
+
+
+class ShoppingPlanSolutions(BaseModel):
+    Plans: List[ShoppingPlanSolution] = Field(description="List of all generated shopping plans.")
+
+
+def analyze_shopping_needs(shopping_requirements:str=None,format_class=ShoppingPlan,messages:List[dict]=None,user_suggestions:str=None,model_name:str='gpt-4o',):
     if messages is None:
 
         messages = [
@@ -28,6 +108,6 @@ def analyze_shopping_needs(shopping_requirements:str,messages:List[dict]=None,us
         {"role": "user",
          "content": load_shopping_needs_decomposition(shopping_requirements=shopping_requirements,user_suggestions=user_suggestions)},]
     llm_client = create_openai_client()
-    result = generate_json_from_llm(client=llm_client, format_class=ShoppingPlan, messages=messages,model_name=model_name)
+    result = generate_json_from_llm(client=llm_client, format_class=format_class, messages=messages,model_name=model_name)
     return result
 

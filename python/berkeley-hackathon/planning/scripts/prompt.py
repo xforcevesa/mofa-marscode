@@ -130,11 +130,14 @@ This is a task that needs to be decomposed :
         prompt += f"/n User's Suggestions and Preferences : {user_suggestions}"
     return
 
-def generate_data(product_data:str,product_plan:str):
+def shopping_plan_validator_prompt(product_data:str, product_plan:str):
     prompt = f"""
-    Background: To further enhance our universal intelligent shopping system, we have successfully crawled extensive product data from various shopping websites. The next step involves developing an agent that can effectively aggregate this product data with the user-generated shopping scheme framework. This aggregation will enable the creation of multiple optimized shopping plans that align with the user's budget and specific requirements.
+    Background: To further enhance our universal intelligent shopping system, we have successfully crawled extensive product data from various shopping websites.
+    The next step involves developing an agent that can effectively aggregate this product data with the user-generated shopping scheme framework.
+    This aggregation will enable the creation of multiple optimized shopping plans that align with the user's budget and specific requirements.
     
-    Objective: Develop an agent capable of aggregating crawled product data with the user's shopping scheme framework to generate multiple comprehensive shopping plans. These plans should be tailored to meet the user's budget constraints and specific needs, providing diverse options for product combinations and selections.
+    Objective: Develop an Evaluation Agent capable of aggregating crawled product data with the user's shopping scheme framework to generate multiple comprehensive shopping plans.
+    These plans should be tailored to meet the user's budget constraints and specific needs, providing diverse options for product combinations and selections.
     
     Specific Requirements:
     
@@ -208,16 +211,14 @@ def generate_data(product_data:str,product_plan:str):
     Multiple Shopping Plans: Generation of several distinct shopping plans that each satisfy the user's budget and requirements, offering a variety of product combinations.
     Comprehensive Details: Each shopping plan includes detailed information about selected products, ensuring transparency and informed decision-making for the user.
     User Satisfaction: Enhanced user experience through personalized and optimized shopping options that cater to diverse preferences and needs.
-    Optimization Explanation:
-    To ensure the agent effectively aggregates product data and generates multiple high-quality shopping plans, the following optimization measures have been incorporated:
-
+    Optimization Explanation: To ensure the agent effectively aggregates product data and generates multiple high-quality shopping plans, the following optimization measures have been incorporated:
+    
     Efficient Filtering: Implement robust filtering mechanisms to quickly identify products that meet detailed query parameters, reducing processing time.
     Budget Optimization: Utilize algorithms that prioritize product selections based on cost-effectiveness, ensuring maximum value within the user's budget.
     Diversity in Plans: Encourage the creation of varied shopping plans by selecting different products within each category, providing the user with a broad spectrum of choices.
     Scalability: Design the aggregation process to handle large volumes of product data, ensuring consistent performance as the dataset grows.
     Quality Assurance: Incorporate checks to verify the accuracy and relevance of selected products, maintaining high standards for each shopping plan.
     Through these optimizations, the agent will efficiently process extensive product data and generate multiple, well-structured shopping plans that cater to the user's individualized shopping needs.
-    
     Product Data:
     {product_data}
     
