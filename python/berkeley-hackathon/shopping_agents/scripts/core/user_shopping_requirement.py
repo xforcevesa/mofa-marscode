@@ -1,13 +1,14 @@
 import os
 from dotenv import load_dotenv  # 用于加载 .env 文件
 from openai import OpenAI
-from prompt import think_base_prompt
+
 
 class RequirementClarificationAgent:
     # def __init__(self, api_key: str, base_url: str,prompt: str=None,model_name='gpt-4o-mini'):
-    def __init__(self, api_key: str,prompt: str=None,model_name='gpt-4o-mini'):
+    def __init__(self, api_key: str, prompt: str = None, model_name='gpt-4o-mini'):
         # 初始化 OpenAI 客户端
-        self.client = OpenAI(api_key=api_key,)
+        self.api_key = api_key
+        self.client = OpenAI(api_key=api_key, )
         if prompt is None:
             think_base_prompt = """
             <Prompt>
@@ -105,7 +106,7 @@ class RequirementClarificationAgent:
         """
         # 将用户输入加入历史记录
         self.conversation_history.append({"role": "user", "content": user_input})
-        
+
         # 构建消息
         messages = [{"role": "system", "content": self.base_prompt}]
         messages.extend(self.conversation_history)  # 包含所有历史对话
@@ -115,20 +116,19 @@ class RequirementClarificationAgent:
         """
         向 OpenAI 第三方 API 发送请求并返回模型的响应。
         """
+        self.client = OpenAI(api_key=self.api_key, )
         response = self.client.chat.completions.create(
             model=self.model_name,
             messages=messages,
             stream=True  # 开启流式返回
         )
-        
+
         # 收集流式返回结果
         assistant_message = ""
         for chunk in response:
             delta = chunk.choices[0].delta.content
             if delta:
                 assistant_message += delta
-                print(delta, end='')  # 实时打印输出
-        print() 
 
         # 将模型回复存入历史记录
         self.conversation_history.append({"role": "assistant", "content": assistant_message})
@@ -154,27 +154,27 @@ class RequirementClarificationAgent:
         print("Agent: Hi there! How can I help you today?")
         while True:
             user_input = input("You: ")
-            if user_input.lower() in ["done", "finish", "完成", "是的", "yes"]:
+            if user_input.lower() in ["done", "finish", "完成"]:
                 if self.final_json:
                     print(f"Agent: Here's the finalized JSON:\n{self.final_json}")
                 else:
                     print("Agent: It seems we haven't finalized the requirements yet.")
                 break
-            
+
             # 生成消息和请求
             messages = self.generate_message(user_input)
             llm_output = self.send_request(messages)
-            
+
             # 尝试提取 JSON
             json_data = self.extract_json(llm_output)
             if json_data:
                 self.final_json = json_data
                 print("Agent: Does this JSON look correct? If so, type 'done' to finish.")
-    def agent_run(self,user_input:str):
+
+    def agent_run(self, user_input: str):
         if user_input.lower() in ["done", "finish", "完成"]:
             if self.final_json:
                 return self.final_json
-
 
 
 if __name__ == "__main__":
@@ -189,6 +189,5 @@ if __name__ == "__main__":
 
     # 创建并运行对话代理
     # agent = RequirementClarificationAgent(api_key=api_key, base_url=base_url)
-    agent = RequirementClarificationAgent(api_key=api_key,)
+    agent = RequirementClarificationAgent(api_key=api_key, )
     agent.run()
-

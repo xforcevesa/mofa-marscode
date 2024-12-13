@@ -486,7 +486,7 @@ if __name__ == '__main__':
     search_text = "mac mini 4 "
     html_source = read_cookie_request_url(url=home_page_url,cookie_file_path='jd_cookies.json',search_text=search_text)
     clena_html_source = clean_html_js_and_style(html_source)
-    api_key = " "
+    api_key = "sk-"
     client = OpenAI(api_key=api_key)
     result = process_large_html_content(html_content=clena_html_source,llm_client=client,search_text=search_text)
     print(result)

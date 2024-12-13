@@ -41,94 +41,77 @@ Use Recognition-Based Language (Nonexhaustive) - Use "I recognize..." instead of
 This protocol ensures LLm produces thoughtful, thorough, and insightful responses, grounded in a deep understanding of the user's needs, while maintaining appropriate emotional boundaries.
  Through systematic analysis and rigorous thinking, LLm provides meaningful answers. 
 """
-def load_shopping_needs_decomposition(shopping_requirements:str,user_suggestions:str=None):
+def load_shopping_needs_decomposition(shopping_requirements: str, user_suggestions: str = None):
     prompt = f"""
-Background: To meet the diverse and personalized shopping needs of users while reducing the manual workload involved in product recommendations and solution design, we plan to develop a universal intelligent shopping system based on knowledge graphs and Intelligent Agent (Agent) technology. As the core agent within this system, you are required to use a task decomposition planning model to generate a shopping scheme framework that includes various product types and their detailed query parameters. This framework will be used to search for specific products on shopping websites. Ultimately, the main task agent will integrate all information to generate multiple complete shopping plans that meet the user's budget and requirements.
+Background: 
+We aim to build a universal intelligent shopping system that integrates knowledge graphs and Intelligent Agent (Agent) technologies. This system will meet diverse and personalized user needs and reduce manual effort in product recommendation and solution design. As the core agent, your role is to:
+1. Parse user requirements from their input.
+2. Decompose the overall shopping task into multiple detailed sub-tasks.
+3. Generate a comprehensive "shopping scheme framework" outlining product categories and specific query parameters for subsequent product searches.
 
-Objective: Implement the main agent's functionality to parse user requirements and decompose tasks, thereby generating a shopping scheme framework that includes various product types and their detailed query parameters. This framework will facilitate subsequent searches for specific products, ultimately resulting in multiple shopping plans that align with the user's budget and needs.
+Objective: 
+Implement the main agent's functionality to analyze user requirements and break down the task. The agent should produce a shopping scheme framework suitable for searching products on shopping websites. Eventually, the main agent can combine search results into multiple complete shopping plans that fit the user’s budget and requirements.
 
-Specific Requirements:
+Required Steps:
+1. **Requirement Parsing:**
+   - Extract key information including:
+     - Budget (e.g., total range)
+     - Purpose (e.g., gaming, office work, design)
+     - Brand Preferences (inclusions or exclusions)
+     - Other Requirements (e.g., performance, appearance, after-sales service)
 
-Requirement Parsing Functionality:
+2. **Task Decomposition:**
+   - Based on the parsed requirements, divide the overall shopping need into sub-tasks.
+   - Each sub-task should focus on a single product type with detailed parameters.
+   - Example for CPU:
+     - Brand: Intel or AMD
+     - Model: e.g., i7-12700K, Ryzen 7 5800X
+     - Core Count: ≥8 cores
+     - Frequency: ≥3.0GHz
+   - Apply similar logic for GPU, Motherboard, Memory, Storage, etc.
 
-Use LLM to extract key information from the user's provided data, including but not limited to:
+3. **Generate Shopping Scheme Framework:**
+   - Create a structured framework listing each product category along with query parameters.
+   - Example:
+     CPU:
+       - Brand: Intel or AMD
+       - Model: i7-12700K or Ryzen 7 5800X
+       - Core Count: ≥8 cores
+       - Frequency: ≥3.0GHz
+     GPU:
+       - Brand: NVIDIA or AMD
+       - Model: RTX 3070 or Radeon RX 6800
+       - Memory: ≥8GB
+     ...(and so forth for other components)
 
-Budget: The user's total budget range.
-Purpose: The primary purpose for purchasing the products (e.g., gaming, office work, design).
-Brand Preferences: Whether the user has specific brand preferences or exclusions.
-Other Requirements: Specific demands regarding product performance, appearance, after-sales service, etc.
-Task Decomposition Logic:
+4. **Subsequent Steps (Not in this function, but contextually important):**
+   - Use the scheme framework to perform product searches on shopping websites.
+   - Integrate and optimize search results to generate multiple complete shopping plans within the user's budget.
+   - Offer diverse and selectable solutions for the user.
 
-Break down the overall shopping task into multiple sub-tasks, each focusing on a specific category or single product type with detailed query parameters. For example:
+**Completion Logic:**
+- If the user indicates they are satisfied with the solution, believes their requirements are met, or says something like "I think this plan is good" or "This fulfills my needs," the logic should consider the process complete.
+- The agent should recognize such user statements as signals that no further decomposition or optimization is required.
 
-Select CPU:
-Brand: Intel or AMD
-Model: Specific models (e.g., i7-12700K, Ryzen 7 5800X)
-Core Count: ≥8 cores
-Frequency: ≥3.0GHz
-Select GPU:
-Brand: NVIDIA or AMD
-Model: Specific models (e.g., RTX 3070, Radeon RX 6800)
-Memory: ≥8GB
-Select Motherboard:
-Brand: ASUS or MSI
-Model: Specific models (e.g., ROG Strix Z690-E, MEG X570 ACE)
-Socket Type: LGA1700 or AM4
-Supported Features: Wi-Fi 6, Bluetooth 5.0, number of expansion slots
-(Continue similarly for memory, storage devices, power supplies, cases, cooling systems, etc.)
+**Optimization Notes:**
+- Ensure the prompt encourages the generation of multiple diverse and customizable schemes.
+- Keep the framework flexible and scalable for adding more parameters or product categories.
 
-Generate Shopping Scheme Framework:
-
-Create a shopping scheme framework that includes all product types and their detailed query parameters, which will be used to search for specific products on shopping websites. For example:
-
-Shopping Scheme Framework:
-
-CPU:
-- Brand: Intel or AMD
-- Model: i7-12700K or Ryzen 7 5800X
-- Core Count: ≥8 cores
-- Frequency: ≥3.0GHz
-
-GPU:
-- Brand: NVIDIA or AMD
-- Model: RTX 3070 or Radeon RX 6800
-- Memory: ≥8GB
-
-Motherboard:
-- Brand: ASUS or MSI
-- Model: ROG Strix Z690-E or MEG X570 ACE
-- Socket Type: LGA1700 or AM4
-- Supported Features: Wi-Fi 6, Bluetooth 5.0, number of expansion slots
-
-*(Continue listing other product types and their parameters)*
-Action Steps:
-
-Input User Information: The user provides their shopping requirements.
-Requirement Parsing: Use LLM to extract and summarize the user's key requirement information.
-Task Decomposition: Based on the parsed requirements, break down the overall shopping task into specific sub-tasks, each corresponding to a product type with detailed query parameters.
-Generate Shopping Scheme Framework: Create a comprehensive shopping scheme framework that includes all necessary product types and their detailed query parameters, facilitating effective product searches on shopping websites.
-Search Specific Products: Utilize other tool functions to search for specific products on shopping websites based on the product types and query parameters in the shopping scheme framework.
-Summarize and Optimize: Feed the search results back to the agent for summarization and optimization, generating multiple complete shopping plans that meet the user's budget and requirements.
-Expected Results:
-
-User Requirement Parsing: Clear and accurate extraction of the user's budget, purpose, brand preferences, and other specific needs.
-Task Decomposition: Effective breakdown of the overall shopping task into multiple specific and related sub-tasks, each focusing on a particular category or single product type with detailed query parameters.
-Shopping Scheme Framework: A detailed shopping scheme framework that lists all product types and their specific query parameters, preparing for subsequent specific product searches.
-Diversified Shopping Plans: Generate multiple different shopping schemes, each offering different product combinations and choices while meeting the user's budget and requirements, ensuring the user has various options to choose from.
-Optimization Explanation:
-
-To ensure the generation of as many shopping solutions as possible, the following optimization measures have been incorporated into the prompt:
-
-Clearly Defined Diversity Requirements: Emphasize generating multiple different shopping schemes in the "Expected Results" section to ensure the diversity and selectivity of the solutions.
-Detailed Task Decomposition: Each sub-task includes specific and detailed query parameters to find more qualifying products during the search process, thereby enabling the combination of diverse shopping plans.
-Flexible Framework Design: The shopping scheme framework is designed to be scalable and flexible, allowing the addition and adjustment of more product types and parameters based on user needs to generate more diverse shopping schemes.
-Through the above optimizations, the system will be able to generate multiple detailed and diverse shopping solutions based on the user's needs, satisfying personalized requirements and providing a rich selection.
-This is a task that needs to be decomposed : 
+User Requirements to Parse:
 {shopping_requirements}
-"""
+    """
+
     if user_suggestions is not None:
-        prompt += f"/n User's Suggestions and Preferences : {user_suggestions}"
+        prompt += f"\nUser's Additional Suggestions and Preferences:\n{user_suggestions}"
+
+    prompt += """
+Additional Instructions:
+- Always check the user's latest input to determine if the requirements are now considered complete.
+- If the user expresses satisfaction or indicates the plan meets their needs, acknowledge and consider the logical process finished.
+- Otherwise, continue refining and decomposing the tasks as instructed.
+"""
     return prompt
+
 
 def shopping_plan_validator_prompt(product_data:str, product_plan:str):
     prompt = f"""

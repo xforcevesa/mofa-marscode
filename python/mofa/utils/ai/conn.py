@@ -6,7 +6,9 @@ from pydantic import BaseModel,Field
 
 def load_llm_api_key_by_env_file(dotenv_path: str='.env.secret',) -> str:
     load_dotenv(dotenv_path)
-    api_key = os.getenv('OPENAI_API_KEY')
+    api_key = os.getenv('OPENAI_API_KEY',None)
+    if api_key is None:
+        api_key = os.getenv('API_KEY',None)
     return api_key
 
 def create_openai_client(api_key: str=load_llm_api_key_by_env_file(),*args,**kwargs) -> OpenAI:

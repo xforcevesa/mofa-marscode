@@ -8,10 +8,10 @@
 <body>
     <div class="mermaid">
         flowchart TB
-  terminal-input
-  agent/op[agent]
-  agent/op -- agent_response --> terminal-input
-  terminal-input -- data as task --> agent/op
+  hitl-agent
+  user-shopping-requirement-agent/op[user-shopping-requirement-agent]
+  user-shopping-requirement-agent/op -- user_shopping_requirement_status --> hitl-agent
+  hitl-agent -- user_input --> user-shopping-requirement-agent/op
 
     </div>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
