@@ -9,7 +9,7 @@ class RequirementClarificationAgent:
         self.client = OpenAI(api_key=api_key, base_url = base_url)
         self.base_prompt = think_base_prompt
         self.conversation_history = []  # 用于记录历史对话
-        self.final_json = {}
+        self.final_json = {} # 保存最终结果
 
     def generate_message(self, user_input: str) -> list:
         """
@@ -66,7 +66,7 @@ class RequirementClarificationAgent:
         print("Agent: Hi there! How can I help you today?")
         while True:
             user_input = input("You: ")
-            if user_input.lower() in ["done", "finish", "完成"]:
+            if user_input.lower() in ["done", "finish", "完成", "是的", "yes"]:
                 if self.final_json:
                     print(f"Agent: Here's the finalized JSON:\n{self.final_json}")
                 else:
@@ -90,9 +90,10 @@ if __name__ == "__main__":
     base_url = os.getenv("BASE_URL")
 
     if not api_key or not base_url:
-        print("Error: Missing OPENAI_API_KEY or OPENAI_BASE_URL environment variable.")
+        print("Error: Missing API_KEY or BASE_URL environment variable.")
         exit(1)
 
     # 创建并运行对话代理
     agent = RequirementClarificationAgent(api_key=api_key, base_url=base_url)
     agent.run()
+
