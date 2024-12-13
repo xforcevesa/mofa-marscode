@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "terminal-input"
+name = "hitl-agent"
 version = "0.3.6"
 authors = [
     "Haixuan Xavier Tao <tao.xavier@outlook.com>",
@@ -8,9 +8,9 @@ authors = [
 description = "Dora terminal input"
 license = "MIT License"
 homepage = "https://github.com/dora-rs/dora.git"
-documentation = "https://github.com/dora-rs/dora/blob/main/node-hub/terminal-input/README.md"
+documentation = "https://github.com/dora-rs/dora/blob/main/node-hub/hitl-agent/README.md"
 readme = "README.md"
-packages = [{ include = "terminal_input" }]
+packages = [{ include = "hitl_agent" }]
 
 [tool.poetry.dependencies]
 #dora-rs = "^0.3.6"
@@ -18,7 +18,7 @@ numpy = "< 2.0.0"
 pyarrow = ">= 5.0.0"
 
 [tool.poetry.scripts]
-terminal-input = "terminal_input.main:main"
+hitl-agent = "hitl_agent.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.8.0"]
