@@ -2,14 +2,15 @@ from typing import List, Optional, Dict
 
 from mofa.utils.ai.conn import create_openai_client, generate_json_from_llm
 from pydantic import BaseModel,Field, HttpUrl
-from prompt import think_base_prompt,load_shopping_needs_decomposition
+from .prompt import think_base_prompt,load_shopping_needs_decomposition
+# from prompt import think_base_prompt,load_shopping_needs_decomposition
 
 class SingleShoppingTypeNeed(BaseModel):
     Price_Range:str = Field(description="Price Range")
     # Brand:str = Field(description="Under a product, there should be only one brand included.")
     Specifications:str = Field(description='Product Specifications')
     Web_Shopping_Search_Text:str = Field(description="Shopping Website Search Content")
-    Product_Model:str = Field(description="Product Model")
+    Example_Product_Model:str = Field(description="Product Model")
 
 class SingleShoppingTypeNeeds(BaseModel):
     Product_Type:str = Field(description="Types of Products")
@@ -17,6 +18,7 @@ class SingleShoppingTypeNeeds(BaseModel):
 
 class ShoppingPlan(BaseModel):
     Shopping_Needs:List[SingleShoppingTypeNeeds]
+    Continue_Analysis:bool = Field(description="If the variable indicates False, it means that further interaction with the user is required; otherwise, if it's True, the loop should be skipped.")
 
 
 

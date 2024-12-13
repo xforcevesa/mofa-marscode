@@ -6,6 +6,7 @@ nodes:
       - user_input
     inputs:
       user_shopping_requirement_status: user-shopping-requirement-agent/user_shopping_requirement_status
+      shopping_planning_status: shopping-plan-agent/shopping_planning_status
   - id: user-shopping-requirement-agent
     operator:
       python: scripts/user_shopping_requirement_agent.py
@@ -14,11 +15,12 @@ nodes:
       outputs:
         - user_shopping_requirement_status
         - user_shopping_requirement_result
-#  - id: shopping-plan-agent
-#    operator:
-#      python: scripts/shopping_plan_strategist_agent.py
-#      inputs:
-#        user_shopping_requirement_result: hitl-agent/user_input
-#      outputs:
-#        - user_shopping_requirement_status
-#        - user_shopping_requirement_result
+  - id: shopping-plan-agent
+    operator:
+      python: scripts/shopping_plan_generator_agent.py
+      inputs:
+        user_input: hitl-agent/user_input
+        user_requirement: user-shopping-requirement-agent/user_shopping_requirement_result
+      outputs:
+        - shopping_planning_status
+        - shopping_planning_result

@@ -7,6 +7,8 @@ import sys
 import click
 import pyarrow as pa
 from dora import Node
+from pycparser.c_ast import While
+
 from mofa.utils.install_pkg.load_task_weaver_result import extract_important_content
 
 RUNNER_CI = True if os.getenv("CI") == "true" else False
@@ -42,10 +44,28 @@ def send_task_and_receive_data(node):
                                 click.echo(results)
 
                                 data = input(
-                                    " Agent: It seems we haven't finalized the requirements yet. :  ",
+                                    " Shopping Requirement Suggestions :  ",
                                 )
                                 node.send_output("user_input", pa.array([clean_string(data)]))
                         event = node.next(timeout=200)
+
+                    while True:
+                        if event['id'] == "shopping_planning_status":
+                            node_results = json.loads(event['value'].to_pylist()[0])
+                            results = node_results.get('node_results')
+
+                            if 'yes' in results or 'Yes' in results:
+                                click.echo("Please wait, we are generating a shopping plan.  /n")
+                                break
+                            else:
+                                click.echo(results)
+
+                                data = input(
+                                    " Agent Shopping Plan Suggestions:  ",
+                                )
+                                node.send_output("user_input", pa.array([clean_string(data)]))
+                        event = node.next(timeout=200)
+
                     if dataflow_end == False:
                         click.echo(f"{node_results.get('step_name', '')}: {results} ", )
                     else:

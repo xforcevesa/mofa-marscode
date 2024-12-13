@@ -17,7 +17,7 @@ class SingleShoppingTypeNeeds(BaseModel):
 
 class ShoppingPlan(BaseModel):
     Shopping_Needs:List[SingleShoppingTypeNeeds]
-
+    Continue_Analysis = Field(description="")
 
 
 
