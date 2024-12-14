@@ -154,7 +154,7 @@ class RequirementClarificationAgent:
         print("Agent: Hi there! How can I help you today?")
         while True:
             user_input = input("You: ")
-            if user_input.lower() in ["done", "finish", "完成", "是的", "yes"]:
+            if user_input.lower() in ["done", "finish", "完成"]:
                 if self.final_json:
                     print(f"Agent: Here's the finalized JSON:\n{self.final_json}")
                 else:
@@ -191,4 +191,3 @@ if __name__ == "__main__":
     # agent = RequirementClarificationAgent(api_key=api_key, base_url=base_url)
     agent = RequirementClarificationAgent(api_key=api_key,)
     agent.run()
-

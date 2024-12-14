@@ -12,7 +12,6 @@ def load_llm_api_key_by_env_file(dotenv_path: str='.env.secret',) -> str:
     return api_key
 
 def create_openai_client(api_key: str=load_llm_api_key_by_env_file(),*args,**kwargs) -> OpenAI:
-    print(f"======kwargs:{kwargs}======")
     client = OpenAI(api_key=api_key,**kwargs)
     return client
 

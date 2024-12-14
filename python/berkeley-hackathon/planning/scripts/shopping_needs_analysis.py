@@ -17,7 +17,7 @@ class SingleShoppingTypeNeeds(BaseModel):
 
 class ShoppingPlan(BaseModel):
     Shopping_Needs:List[SingleShoppingTypeNeeds]
-    Continue_Analysis = Field(description="")
+    Continue_Analysis:bool = Field(description="If the variable indicates False, it means that further interaction with the user is required; otherwise, if it's True, the loop should be skipped.")
 
 
 
@@ -101,15 +101,11 @@ class ShoppingPlanSolutions(BaseModel):
 
 def extract_web_search_text_by_product_type(shopping_plan: ShoppingPlan) -> Dict[str, List[str]]:
     result = {}
-
-    # 遍历每个ShoppingTypeNeed和其ProductInfos
     for shopping_type in shopping_plan.Shopping_Needs:
         for product in shopping_type.Product_Infos:
-            # 如果Product_Type已经是字典中的键，添加Web_Shopping_Search_Text到该键的列表
             if shopping_type.Product_Type not in result:
                 result[shopping_type.Product_Type] = []
             result[shopping_type.Product_Type].append(product.Web_Shopping_Search_Text)
-
     return result
 
 def analyze_shopping_needs(shopping_requirements:str=None,format_class=ShoppingPlan,messages:List[dict]=None,user_suggestions:str=None,model_name:str='gpt-4o',):

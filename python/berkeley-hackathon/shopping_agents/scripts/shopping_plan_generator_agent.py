@@ -3,14 +3,13 @@ import os
 from dora import Node, DoraStatus
 import pyarrow as pa
 from mofa.kernel.utils.util import  create_agent_output, load_node_result
-from core.prompt import think_base_prompt,shopping_plan_validator_prompt
 from core.shopping_needs_analysis import analyze_shopping_needs,ShoppingPlan,extract_web_search_text_by_product_type
 
 class Operator:
     def __init__(self):
         self.user_requirement = None
         self.user_suggestions_messages = []
-        self.max_loop_num = 5
+        self.max_loop_num = 3
     def on_event(
         self,
         dora_event,
@@ -44,15 +43,16 @@ class Operator:
                                 pa.array([create_agent_output(step_name='shopping_planning_status',
                                                               output_data="yes",
                                                               dataflow_status=os.getenv(
-                                                                  'IS_DATAFLOW_END', True))]),
+                                                                  'IS_DATAFLOW_END', False))]),
 
                                 dora_event['metadata'])
                     shopping_web_search = extract_web_search_text_by_product_type(shopping_plan=result)
+                    print('  shopping_web_search   : ',shopping_web_search)
                     send_output("shopping_planning_result",
                                 pa.array([create_agent_output(step_name='shopping_planning_result',
                                                               output_data=shopping_web_search,
                                                               dataflow_status=os.getenv(
-                                                                  'IS_DATAFLOW_END', True))]),
+                                                                  'IS_DATAFLOW_END', False))]),
 
                                 dora_event['metadata'])
                     self.max_loop_num = 0

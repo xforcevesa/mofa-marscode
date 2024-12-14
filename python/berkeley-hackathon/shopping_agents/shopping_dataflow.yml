@@ -7,6 +7,7 @@ nodes:
     inputs:
       user_shopping_requirement_status: user-shopping-requirement-agent/user_shopping_requirement_status
       shopping_planning_status: shopping-plan-agent/shopping_planning_status
+      amazon_shopping_result: amazon-agent/amazon_shopping_result
   - id: user-shopping-requirement-agent
     operator:
       python: scripts/user_shopping_requirement_agent.py
@@ -24,3 +25,10 @@ nodes:
       outputs:
         - shopping_planning_status
         - shopping_planning_result
+  - id: amazon-agent
+    operator:
+      python: scripts/amazon_agent.py
+      inputs:
+        web_search_task: shopping-plan-agent/shopping_planning_result
+      outputs:
+        - amazon_shopping_result
