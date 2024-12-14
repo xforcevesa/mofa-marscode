@@ -10,6 +10,8 @@ import time
 from product_analysis_agent import ProductAnalysisAgent, prompt_template
 from dotenv import load_dotenv
 import os
+from typing import List
+from shopping_result import HtmlSearchTextChunk
 
 def setup_selenium_driver(driver_path: str, headless: bool = True) -> webdriver.Chrome:
     """
@@ -119,6 +121,22 @@ def save_to_file(content: str, filename: str):
         print(f"[INFO] Content saved to {filename}")
     except IOError as e:
         print(f"[ERROR] Failed to save content to {filename}: {e}")
+        
+def add_url_prefix(chunks: List[HtmlSearchTextChunk], prefix: str) -> List[HtmlSearchTextChunk]:
+    """
+    Add a URL prefix to all HtmlSearchTextChunk objects in the list.
+
+    Args:
+        chunks (List[HtmlSearchTextChunk]): List of HtmlSearchTextChunk objects.
+        prefix (str): The prefix to be added to the URL field.
+
+    Returns:
+        List[HtmlSearchTextChunk]: Updated list of HtmlSearchTextChunk objects with prefixed URLs.
+    """
+    for chunk in chunks:
+        if chunk.url and not chunk.url.startswith("http"):
+            chunk.url = f"{prefix}{chunk.url}"
+    return chunks
 
 if __name__ == "__main__": # python search.py --driver-path /usr/bin/chromedriver --search-keyword "cup"
     parser = argparse.ArgumentParser(description="Fetch product cards using Selenium.")
@@ -136,7 +154,7 @@ if __name__ == "__main__": # python search.py --driver-path /usr/bin/chromedrive
         # base_url="https://api.siliconflow.cn/v1",
     )
 
-    
+    """
     # Balsam Hill
     balsamhill_template = "https://www.balsamhill.com/search?text={query}&sort=relevanceSort"
     balsamhill_card_class_prefix = "productCard_product-listing-card-wrapper__"
@@ -150,8 +168,8 @@ if __name__ == "__main__": # python search.py --driver-path /usr/bin/chromedrive
         balsamhill_results = agent.process_cards(balsamhill_cards, "gpt-4o-mini", 32000, prompt_template, args.search_keyword)
         print("[INFO] Balsam Hill Results:")
         print(balsamhill_results)
-    
     """
+    
     # Christmas Lights Etc
     christmaslightsetc_template = "https://www.christmaslightsetc.com/browse/?q={query}"
     christmaslightsetc_card_class = "thumbnail pBox"
@@ -163,7 +181,12 @@ if __name__ == "__main__": # python search.py --driver-path /usr/bin/chromedrive
         if args.save:
             save_to_file(formatted_christmaslightsetc, f"christmaslightsetc_{args.search_keyword}_cards.html")
         christmaslightsetc_results = agent.process_cards(christmaslightsetc_cards, "gpt-4o-mini", 32000, prompt_template, args.search_keyword)
+        # Add URL prefix for Christmas Lights Etc
+        christmaslightsetc_results.chunks = add_url_prefix(
+            christmaslightsetc_results.chunks, 
+            "https://www.christmaslightsetc.com"
+        )
         print("[INFO] Christmas Lights Etc Results:")
         print(christmaslightsetc_results)
-    """
+    
         
