@@ -370,8 +370,12 @@ def shopping_html_structure(llm_client,html_content:str,search_text:str)->str:
     if isinstance(html_content,str):
         clean_html_source = clean_html_js_and_style(html_content = html_content)
         result = process_large_html_content(html_content=clean_html_source, llm_client=llm_client, search_text=search_text)
-        if len(result)>0:
-            for i in result: all_result.append(i.json())
+        if isinstance(result,list):
+            if len(result)>0:
+                for i in result: all_result.append(i.json())
+            else:
+                all_result.append('')
         else:
-            all_result.append('')
+            all_result.append(result.json())
+
     return ' ||| '.join(all_result)
