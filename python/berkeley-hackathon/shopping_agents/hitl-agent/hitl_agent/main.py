@@ -19,6 +19,8 @@ RUNNER_CI = True if os.getenv("CI") == "true" else False
 def clean_string(input_string:str):
     return input_string.encode('utf-8', 'replace').decode('utf-8')
 def send_task_and_receive_data(node):
+    shopping_requirement_status = False
+    shopping_planning_status = False
     while True:
         data = input(
             " Send You Task :  ",
@@ -28,43 +30,52 @@ def send_task_and_receive_data(node):
         if event is not None:
             while True:
                 if event is not None:
+
+                    if shopping_requirement_status is False:
+                        while True:
+                            if event['id'] == "user_shopping_requirement_status":
+                                node_results = json.loads(event['value'].to_pylist()[0])
+                                results = node_results.get('node_results')
+                                is_dataflow_end = node_results.get('dataflow_status', False)
+
+                                if 'yes' in results or 'Yes' in results:
+                                    click.echo("Please wait, we are generating a shopping plan.  /n")
+                                    shopping_requirement_status = True
+                                    break
+                                else:
+                                    click.echo(results)
+
+                                    data = input(
+                                        " Shopping Requirement Suggestions :  ",
+                                    )
+                                    node.send_output("user_input", pa.array([clean_string(data)]))
+                            event = node.next(timeout=200)
+                    if shopping_planning_status is False:
+                        while True:
+
+                            if event['id'] == "shopping_planning_status":
+                                node_results = json.loads(event['value'].to_pylist()[0])
+                                results = node_results.get('node_results')
+
+                                if 'yes' in results or 'Yes' in results:
+                                    click.echo("This is the final shopping assembly plan.")
+                                    click.echo("results")
+
+                                    click.echo("Please wait, we are go to web search .")
+                                    shopping_planning_status = True
+                                    break
+                                else:
+                                    click.echo(results)
+
+                                    data = input(
+                                        " Agent Shopping Plan Suggestions:  ",
+                                    )
+                                    node.send_output("user_input", pa.array([clean_string(data)]))
+                            event = node.next(timeout=200)
+
                     node_results = json.loads(event['value'].to_pylist()[0])
                     results = node_results.get('node_results')
                     dataflow_end = node_results.get('dataflow_status', False)
-                    while True:
-                        if event['id'] == "user_shopping_requirement_status":
-                            node_results = json.loads(event['value'].to_pylist()[0])
-                            results = node_results.get('node_results')
-                            is_dataflow_end = node_results.get('dataflow_status', False)
-
-                            if 'yes' in results or 'Yes' in results:
-                                click.echo("Please wait, we are generating a shopping plan.  /n")
-                                break
-                            else:
-                                click.echo(results)
-
-                                data = input(
-                                    " Shopping Requirement Suggestions :  ",
-                                )
-                                node.send_output("user_input", pa.array([clean_string(data)]))
-                        event = node.next(timeout=200)
-
-                    while True:
-                        if event['id'] == "shopping_planning_status":
-                            node_results = json.loads(event['value'].to_pylist()[0])
-                            results = node_results.get('node_results')
-
-                            if 'yes' in results or 'Yes' in results:
-                                click.echo("Please wait, we are generating a shopping plan.  /n")
-                                break
-                            else:
-                                click.echo(results)
-
-                                data = input(
-                                    " Agent Shopping Plan Suggestions:  ",
-                                )
-                                node.send_output("user_input", pa.array([clean_string(data)]))
-                        event = node.next(timeout=200)
 
                     if dataflow_end == False:
                         click.echo(f"{node_results.get('step_name', '')}: {results} ", )

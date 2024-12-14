@@ -3,13 +3,12 @@ from dora import Node, DoraStatus
 import pyarrow as pa
 from mofa.kernel.utils.util import load_agent_config, create_agent_output, load_node_result
 from core.user_shopping_requirement import RequirementClarificationAgent
-from dotenv import load_dotenv  # 用于加载 .env 文件
+from dotenv import load_dotenv
 
 class Operator:
     def __init__(self):
         load_dotenv('.env.secret')
         self.api_key = os.getenv("API_KEY")
-        print('------ : ',self.api_key)
         self.user_shopping_requirement = RequirementClarificationAgent(api_key=self.api_key)
         self.task = None
     def on_event(
@@ -29,7 +28,7 @@ class Operator:
                     send_output("user_shopping_requirement_status", pa.array([create_agent_output(step_name='user_shopping_requirement_status',
                                                                                    output_data="yes",
                                                                                    dataflow_status=os.getenv(
-                                                                                       'IS_DATAFLOW_END', True))]),
+                                                                                       'IS_DATAFLOW_END', False))]),
                                 dora_event['metadata'])
                     send_output("user_shopping_requirement_result",
                                 pa.array([create_agent_output(step_name='user_shopping_requirement_result',
@@ -49,8 +48,3 @@ class Operator:
 
         return DoraStatus.CONTINUE
 
-# task = "音响系统"
-# x = Operator()
-# message = x.user_shopping_requirement.generate_message(task)
-# llm_output = x.user_shopping_requirement.send_request(messages=message)
-# json_data = x.user_shopping_requirement.extract_json(llm_output)

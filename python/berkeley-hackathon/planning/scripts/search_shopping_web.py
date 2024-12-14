@@ -33,6 +33,7 @@ from shopping_needs_analysis import analyze_shopping_needs, ShoppingPlanSolution
 #
 #         return DoraStatus.CONTINUE
 
-# search_text = "我想要一个家庭影院系统"
+# search_text = "我想要一个家庭影院系统，预算40000人名币"
 # shopping_plan = analyze_shopping_needs(shopping_requirements=search_text)
 # shopping_web_search = extract_web_search_text_by_product_type(shopping_plan=shopping_plan)
+# print(shopping_web_search)
