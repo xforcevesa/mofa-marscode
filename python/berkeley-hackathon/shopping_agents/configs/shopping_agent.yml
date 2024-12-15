@@ -1,0 +1,22 @@
+amazon_agent:
+  inputs: amazon_search
+  outputs: amazon_shopping_result
+
+bronners_agent:
+  inputs: bronners_search
+  outputs: bronners_shopping_result
+
+
+worldmarket_agent:
+  inputs: worldmarket_search
+  outputs: worldmarket_shopping_result
+
+
+minted_agent:
+  inputs: minted_search
+  outputs: minted_shopping_result
+
+
+balsamhill_agent:
+  inputs: balsamhill_search
+  outputs: balsamhill_shopping_result

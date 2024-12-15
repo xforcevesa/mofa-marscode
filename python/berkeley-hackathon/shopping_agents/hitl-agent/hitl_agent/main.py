@@ -34,53 +34,54 @@ def send_task_and_receive_data(node):
                             if event['id'] == "user_shopping_requirement_status":
                                 node_results = json.loads(event['value'].to_pylist()[0])
                                 results = node_results.get('node_results')
-
-                                if 'yes' in results or 'Yes' in results:
-                                    click.echo("This is the user's requirement description.")
-                                    click.echo(results)
-                                    shopping_requirement_status = True
-                                    break
-                                else:
-                                    click.echo(results)
-
-                                    data = input(
-                                        " Shopping Requirement Suggestions :  ",
-                                    )
-                                    node.send_output("user_input", pa.array([clean_string(data)]))
+                                click.echo(results)
+                                data = input(
+                                    " Shopping Requirement Suggestions :  ",
+                                )
+                                node.send_output("user_input", pa.array([clean_string(data)]))
+                            if event['id'] == "user_shopping_requirement_result":
+                                node_results = json.loads(event['value'].to_pylist()[0])
+                                results = node_results.get('node_results')
+                                click.echo("This is the user's requirement description.")
+                                click.echo(results)
+                                shopping_requirement_status = True
+                                break
                             event = node.next(timeout=5000)
                     if shopping_planning_status is False:
                         while True:
                             if event['id'] == "shopping_planning_status":
                                 node_results = json.loads(event['value'].to_pylist()[0])
                                 results = node_results.get('node_results')
+                                click.echo(results)
+                                data = input(
+                                    " Agent Shopping Plan Suggestions:  ",
+                                )
+                                node.send_output("shopping_plan_user_input", pa.array([clean_string(data)]))
 
-                                if 'yes' in results or 'Yes' in results:
-                                    click.echo("This is the final shopping assembly plan.")
-                                    click.echo(results)
-                                    click.echo("Please wait, we are going to web search")
-                                    shopping_planning_status = True
-                                    break
-                                else:
-                                    click.echo(results)
-                                    data = input(
-                                        " Agent Shopping Plan Suggestions:  ",
-                                    )
-                                    node.send_output("user_input", pa.array([clean_string(data)]))
+                            if event['id'] == "shopping_planning_result":
+                                node_results = json.loads(event['value'].to_pylist()[0])
+                                results = node_results.get('node_results')
+                                click.echo("This is the user's requirement description.")
+                                click.echo(results)
+                                shopping_requirement_status = True
+                                break
                             event = node.next(timeout=5000)
                     if shopping_solution_status is False:
                         while True:
                             if event['id'] == "shopping_solution_status":
                                 node_results = json.loads(event['value'].to_pylist()[0])
                                 results = node_results.get('node_results')
-                                if 'yes' in results or 'Yes' in results:
-                                    click.echo("This is the final shopping solution.")
-                                    click.echo(results)
-                                    shopping_planning_status = True
-                                    break
-                                else:
-                                    click.echo(results)
-                                    data = input(" Please re-enter your suggestions for the shopping plan :  ",)
-                                    node.send_output("shopping_solution_user_input", pa.array([clean_string(data)]))
+                                click.echo(results)
+                                data = input(" Please re-enter your suggestions for the shopping plan :  ", )
+                                node.send_output("shopping_solution_user_input", pa.array([clean_string(data)]))
+
+                            if event['id'] == "shopping_solution_result":
+                                node_results = json.loads(event['value'].to_pylist()[0])
+                                results = node_results.get('node_results')
+                                click.echo("This is the user's requirement description.")
+                                click.echo(results)
+                                shopping_requirement_status = True
+                                break
                             event = node.next(timeout=5000)
 
                     node_results = json.loads(event['value'].to_pylist()[0])

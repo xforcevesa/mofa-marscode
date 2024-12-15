@@ -220,12 +220,13 @@ class ProductScraper:
 
 if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriver --search-keyword "cup" -s
     parser = argparse.ArgumentParser(description="Fetch product cards using Selenium.")
-    parser.add_argument("--driver-path", required=True, help="Path to the ChromeDriver executable.")
+    # parser.add_argument("--driver-path", required=True, help="Path to the ChromeDriver executable.")
+    parser.add_argument("--driver-path", default=None, help="Path to the ChromeDriver executable.")
     parser.add_argument("--search-keyword", default="lights", help="Search keyword to query.")
     parser.add_argument("--save", "-s", action="store_true", help="Save formatted HTML to files.")
     args = parser.parse_args()
 
-    load_dotenv()
+    load_dotenv('.env.secret')
     api_key = os.getenv("API_KEY")
     agent = ProductAnalysisAgent(
         api_key=api_key,
@@ -274,13 +275,27 @@ if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriv
         print(christmaslightsetc_results)
     """
     # Not On The High Street
-    notonthehighstreet_template = "https://www.notonthehighstreet.com/search?term={query}"
-    notonthehighstreet_results = scraper.scrape(
-        url_template=notonthehighstreet_template,
+    # notonthehighstreet_template = "https://www.notonthehighstreet.com/search?term={query}"
+    # notonthehighstreet_results = scraper.scrape(
+    #     url_template=notonthehighstreet_template,
+    #     query=args.search_keyword,
+    #     site_name="Not On The High Street",
+    #     selector_type="data-testid",
+    #     selector_value="product-card",
+    #     analysis_agent=agent,
+    #     model_name="gpt-4o-mini",
+    #     max_tokens=32000,
+    #     prompt_template=prompt_template,
+    #     scroll=True,
+    #     save=args.save
+    # )
+    christmaslightsetc_template = "https://www.christmaslightsetc.com/browse/?q={query}"
+    christmaslightsetc_results = scraper.scrape(
+        url_template=christmaslightsetc_template,
         query=args.search_keyword,
-        site_name="Not On The High Street",
-        selector_type="data-testid",
-        selector_value="product-card",
+        site_name="Christmas Lights Etc",
+        selector_type="class",
+        selector_value="thumbnail pBox",
         analysis_agent=agent,
         model_name="gpt-4o-mini",
         max_tokens=32000,
@@ -288,11 +303,19 @@ if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriv
         scroll=True,
         save=args.save
     )
-    if notonthehighstreet_results:
-        # Add URL prefix for Not On The High Street
-        notonthehighstreet_results.chunks = scraper.add_url_prefix(
-            notonthehighstreet_results.chunks, 
-            "https://www.notonthehighstreet.com"
+    if christmaslightsetc_results:
+        # Add URL prefix for Christmas Lights Etc
+        christmaslightsetc_results.chunks = scraper.add_url_prefix(
+            christmaslightsetc_results.chunks,
+            "https://www.christmaslightsetc.com"
         )
-        print("[INFO] Not On The High Street Results with updated URLs:")
-        print(notonthehighstreet_results)
+        print("[INFO] Christmas Lights Etc Results with updated URLs:")
+        print(christmaslightsetc_results)
+    # if notonthehighstreet_results:
+    #     # Add URL prefix for Not On The High Street
+    #     notonthehighstreet_results.chunks = scraper.add_url_prefix(
+    #         notonthehighstreet_results.chunks,
+    #         "https://www.notonthehighstreet.com"
+    #     )
+    #     print("[INFO] Not On The High Street Results with updated URLs:")
+    #     print(notonthehighstreet_results)

@@ -6,8 +6,9 @@ from typing import List, Dict
 import tiktoken
 from pydantic import BaseModel
 from typing import List, Optional
-import json
 
+from mofa.utils.ai.conn import create_openai_client
+from .util import shopping_html_structure
 # Define data models
 class Media(BaseModel):
     images: List[str] = None
@@ -226,15 +227,17 @@ def fetch_html_with_undetected_chromedriver(search_text: str, page: int = 1) -> 
 # Main process
 if __name__ == '__main__':
     search_text = "Christmas ornaments"
-    api_key = "sk-"
-
     html_content = fetch_html_with_undetected_chromedriver(search_text)
-    result = process_large_html_content(html_content=html_content, search_text=search_text, api_key=api_key)
-
-    # Save the result to a JSON file
-    if result:
-        with open("parsed_results.json", "w", encoding="utf-8") as json_file:
-            json.dump(result, json_file, ensure_ascii=False, indent=4)
-        print("Parsed results saved to 'parsed_results.json'.")
-    else:
-        print("No valid parsed results obtained.")
+    api_key = "sk-"
+    client = create_openai_client(api_key=api_key)
+    result = shopping_html_structure(llm_client=client,html_content=html_content,search_text=search_text)
+    print(result)
+    # result = process_large_html_content(html_content=html_content, search_text=search_text, api_key=api_key)
+    #
+    # # Save the result to a JSON file
+    # if result:
+    #     with open("parsed_results.json", "w", encoding="utf-8") as json_file:
+    #         json.dump(result, json_file, ensure_ascii=False, indent=4)
+    #     print("Parsed results saved to 'parsed_results.json'.")
+    # else:
+    #     print("No valid parsed results obtained.")

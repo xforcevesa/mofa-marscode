@@ -5,11 +5,15 @@ nodes:
     outputs:
       - user_input
       - shopping_solution_user_input
+      - shopping_plan_user_input
     inputs:
       user_shopping_requirement_status: user-shopping-requirement-agent/user_shopping_requirement_status
+      user_shopping_requirement_result: user-shopping-requirement-agent/user_shopping_requirement_result
       shopping_planning_status: shopping-plan-agent/shopping_planning_status
+      shopping_planning_result: shopping-plan-agent/shopping_planning_result
       amazon_shopping_result: amazon-agent/amazon_shopping_result
       shopping_solution_result: shopping-solution-agent/shopping_solution_result
+      shopping_solution_status: shopping-solution-agent/shopping_solution_status
   - id: user-shopping-requirement-agent
     operator:
       python: scripts/user_shopping_requirement_agent.py
@@ -22,25 +26,65 @@ nodes:
     operator:
       python: scripts/shopping_plan_generator_agent.py
       inputs:
-        user_input: hitl-agent/user_input
+        shopping_plan_user_input: hitl-agent/shopping_plan_user_input
         user_requirement: user-shopping-requirement-agent/user_shopping_requirement_result
       outputs:
         - shopping_planning_status
         - shopping_planning_result
+        - amazon_search
+        - bronners_search
+        - worldmarket_search
+        - minted_search
+        - balsamhill_search
+        - shopping_planning_output_agents
   - id: amazon-agent
     operator:
       python: scripts/amazon_agent.py
       inputs:
-        web_search_task: shopping-plan-agent/shopping_planning_result
+        amazon_search: shopping-plan-agent/amazon_search
       outputs:
         - amazon_shopping_result
+  - id: bronners-agent
+    operator:
+      python: scripts/bronners_agent.py
+      inputs:
+        bronners_search: shopping-plan-agent/bronners_search
+      outputs:
+        - bronners_shopping_result
+  - id: worldmarket-agent
+    operator:
+      python: scripts/worldmarket_agent.py
+      inputs:
+        worldmarket_search: shopping-plan-agent/worldmarket_search
+      outputs:
+        - worldmarket_shopping_result
+  - id: minted-agent
+    operator:
+      python: scripts/minted_agent.py
+      inputs:
+        minted_search: shopping-plan-agent/minted_search
+      outputs:
+        - minted_shopping_result
+  - id: balsamhill-agent
+    operator:
+      python: scripts/balsamhill_agent.py
+      inputs:
+        balsamhill_search: shopping-plan-agent/balsamhill_search
+      outputs:
+        - balsamhill_shopping_result
+
   - id: shopping-solution-agent
     operator:
       python: scripts/shopping_solution_agent.py
       inputs:
         shopping_planning_result: shopping-plan-agent/shopping_planning_result
-        product_data: amazon-agent/amazon_shopping_result
         shopping_solution_user_input: hitl-agent/shopping_solution_user_input
+        shopping_planning_output_agents: shopping-plan-agent/shopping_planning_output_agents
+        amazon_shopping_result: amazon-agent/amazon_shopping_result
+        bronners_shopping_result: bronners-agent/bronners_shopping_result
+        worldmarket_shopping_result: worldmarket-agent/worldmarket_shopping_result
+        minted_shopping_result: minted-agent/minted_shopping_result
+        balsamhill_shopping_result: balsamhill-agent/balsamhill_shopping_result
       outputs:
         - shopping_solution_status
         - shopping_solution_result

@@ -96,3 +96,5 @@ ultralytics==8.3.5
 
 # --------- web sider --------- #
 scrapegraphai
+undetected_chromedriver
+selenium
