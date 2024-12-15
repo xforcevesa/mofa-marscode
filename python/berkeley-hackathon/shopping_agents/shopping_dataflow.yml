@@ -88,6 +88,7 @@ nodes:
         balsamhill_search: shopping-plan-agent/balsamhill_search
       outputs:
         - balsamhill_shopping_result
+        - balsamhill_agent_status
 
   - id: shopping-solution-agent
     operator:
