@@ -4,6 +4,8 @@
 
 import json
 import os
+import time
+
 from dora import Node, DoraStatus
 import pyarrow as pa
 from mofa.kernel.utils.util import  create_agent_output, load_node_result
@@ -41,6 +43,14 @@ class Operator:
                 send_output("shopping_planning_status", pa.array([create_agent_output(step_name='shopping_planning_status', output_data='data',dataflow_status=os.getenv('IS_DATAFLOW_END',False))]),dora_event['metadata'])
                 self.max_loop_num += 1
             elif dora_event['id'] == 'shopping_plan_user_input':
+                t1 = time.time()
+                send_output("shopping_plan_agent_status", pa.array([create_agent_output(step_name='shopping_plan_agent_status',
+                                                                                 output_data={
+                                                                                     'agent_name': 'shopping_plan_agent',
+                                                                                     'agent_status': 'Running'},
+                                                                                 dataflow_status=os.getenv(
+                                                                                     'IS_DATAFLOW_END', False))]),
+                            dora_event['metadata'])
                 user_input = dora_event["value"][0].as_py()
                 self.user_suggestions_messages.append(json.dumps({"user_input":user_input}))
                 result = analyze_shopping_needs(format_class=ShoppingPlan,shopping_requirements=self.user_requirement,user_suggestions=json.dumps(self.user_suggestions_messages))
@@ -83,6 +93,13 @@ class Operator:
                                                                   'IS_DATAFLOW_END', False))]),
 
                                 dora_event['metadata'])
-
+                    send_output("shopping_plan_agent_status", pa.array([create_agent_output(step_name='shopping_plan_agent_status',
+                                                                                     output_data={
+                                                                                         'agent_name': 'shopping_plan_agent',
+                                                                                         'agent_status': 'Finish',
+                                                                                         'use_time': time.time() - t1},
+                                                                                     dataflow_status=os.getenv(
+                                                                                         'IS_DATAFLOW_END', False))]),
+                                dora_event['metadata'])
                     self.max_loop_num = 0
         return DoraStatus.CONTINUE

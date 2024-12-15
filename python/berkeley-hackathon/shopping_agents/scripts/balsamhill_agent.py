@@ -21,6 +21,14 @@ class Operator:
             if dora_event['id'] == 'balsamhill_search':
                 all_results = []
                 t1 = time.time()
+                send_output("balsamhill_agent_status", pa.array([create_agent_output(step_name='balsamhill_agent_status',
+                                                                                 output_data={
+                                                                                     'agent_name': 'balsamhill_agent',
+                                                                                     'agent_status': 'Running'},
+                                                                                 dataflow_status=os.getenv(
+                                                                                     'IS_DATAFLOW_END', False))]),
+                            dora_event['metadata'])
+
                 self.task = json.loads(load_node_result(dora_event["value"][0].as_py()))
                 llm_client = create_openai_client()
                 print('-------: ',self.task)
@@ -36,10 +44,16 @@ class Operator:
                         print(e)
                         continue
                 print('balsamhill_shopping_result : ',all_results )
-                send_output("balsamhill_shopping_result", pa.array([create_agent_output(step_name='bronners_shopping_result',
+                send_output("balsamhill_shopping_result", pa.array([create_agent_output(step_name='balsamhill_shopping_result',
                                                                                output_data=all_results,
                                                                                dataflow_status=os.getenv(
                                                                                    'IS_DATAFLOW_END', False))]),
                             dora_event['metadata'])
-
+                send_output("balsamhill_agent_status", pa.array([create_agent_output(step_name='balsamhill_agent_status',
+                                                                         output_data={'agent_name': 'balsamhill_agent',
+                                                                                      'agent_status': 'Finish',
+                                                                                      'use_time': time.time() - t1},
+                                                                         dataflow_status=os.getenv(
+                                                                             'IS_DATAFLOW_END', False))]),
+                    dora_event['metadata'])
         return DoraStatus.CONTINUE

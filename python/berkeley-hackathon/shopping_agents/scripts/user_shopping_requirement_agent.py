@@ -1,4 +1,6 @@
 import os
+import time
+
 from dora import Node, DoraStatus
 import pyarrow as pa
 from mofa.kernel.utils.util import load_agent_config, create_agent_output, load_node_result
@@ -18,6 +20,14 @@ class Operator:
     ) -> DoraStatus:
         if dora_event["type"] == "INPUT":
             if dora_event['id'] == "user_input":
+                t1 = time.time()
+                send_output("user_shopping_requirement_agent_status", pa.array([create_agent_output(step_name='user_shopping_requirement_agent_status',
+                                                                                 output_data={
+                                                                                     'agent_name': 'user_shopping_requirement_agent',
+                                                                                     'agent_status': 'Running'},
+                                                                                 dataflow_status=os.getenv(
+                                                                                     'IS_DATAFLOW_END', False))]),
+                            dora_event['metadata'])
                 self.task = dora_event["value"][0].as_py()
                 message = self.user_shopping_requirement.generate_message(user_input=self.task)
                 llm_output = self.user_shopping_requirement.send_request(messages=message)
@@ -32,6 +42,14 @@ class Operator:
                                                                   'IS_DATAFLOW_END', True))]),
                                 dora_event['metadata'])
                     self.user_shopping_requirement = RequirementClarificationAgent(api_key=self.api_key)
+                    send_output("user_shopping_requirement_agent_status", pa.array([create_agent_output(step_name='user_shopping_requirement_agent_status',
+                                                                                     output_data={
+                                                                                         'agent_name': 'user_shopping_requirement_agent',
+                                                                                         'agent_status': 'Finish',
+                                                                                         'use_time': time.time() - t1},
+                                                                                     dataflow_status=os.getenv(
+                                                                                         'IS_DATAFLOW_END', False))]),
+                                dora_event['metadata'])
 
                 else:
                     send_output("user_shopping_requirement_status",

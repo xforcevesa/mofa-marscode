@@ -14,6 +14,16 @@ nodes:
       amazon_shopping_result: amazon-agent/amazon_shopping_result
       shopping_solution_result: shopping-solution-agent/shopping_solution_result
       shopping_solution_status: shopping-solution-agent/shopping_solution_status
+
+      user_shopping_requirement_agent_status: user-shopping-requirement-agent/user_shopping_requirement_agent_status
+      shopping_plan_agent_status: shopping-plan-agent/shopping_plan_agent_status
+      amazon_agent_status: amazon-agent/amazon_agent_status
+      bronners_agent_status: bronners-agent/bronners_agent_status
+      worldmarket_agent_status: worldmarket-agent/worldmarket_agent_status
+      minted_agent_status: minted-agent/minted_agent_status
+      balsamhill_agent_status: balsamhill-agent/balsamhill_agent_status
+      shopping_solution_agent_status: shopping-solution-agent/shopping_solution_agent_status
+
   - id: user-shopping-requirement-agent
     operator:
       python: scripts/user_shopping_requirement_agent.py
@@ -22,6 +32,7 @@ nodes:
       outputs:
         - user_shopping_requirement_status
         - user_shopping_requirement_result
+        - user_shopping_requirement_agent_status
   - id: shopping-plan-agent
     operator:
       python: scripts/shopping_plan_generator_agent.py
@@ -37,6 +48,7 @@ nodes:
         - minted_search
         - balsamhill_search
         - shopping_planning_output_agents
+        - shopping_plan_agent_status
   - id: amazon-agent
     operator:
       python: scripts/amazon_agent.py
@@ -44,6 +56,7 @@ nodes:
         amazon_search: shopping-plan-agent/amazon_search
       outputs:
         - amazon_shopping_result
+        - amazon_agent_status
   - id: bronners-agent
     operator:
       python: scripts/bronners_agent.py
@@ -51,6 +64,7 @@ nodes:
         bronners_search: shopping-plan-agent/bronners_search
       outputs:
         - bronners_shopping_result
+        - bronners_agent_status
   - id: worldmarket-agent
     operator:
       python: scripts/worldmarket_agent.py
@@ -58,6 +72,7 @@ nodes:
         worldmarket_search: shopping-plan-agent/worldmarket_search
       outputs:
         - worldmarket_shopping_result
+        - worldmarket_agent_status
   - id: minted-agent
     operator:
       python: scripts/minted_agent.py
@@ -65,6 +80,7 @@ nodes:
         minted_search: shopping-plan-agent/minted_search
       outputs:
         - minted_shopping_result
+        - minted_agent_status
   - id: balsamhill-agent
     operator:
       python: scripts/balsamhill_agent.py
@@ -88,3 +104,4 @@ nodes:
       outputs:
         - shopping_solution_status
         - shopping_solution_result
+        - shopping_solution_agent_status

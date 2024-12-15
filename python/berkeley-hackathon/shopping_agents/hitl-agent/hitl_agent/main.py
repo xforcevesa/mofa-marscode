@@ -21,6 +21,8 @@ class Click:
     def __init__(self):
         self.msg = ""
         self.start_server()
+        self.node_info = {}
+        shopping_dataflow = {''}
 
     def echo(self, message):
         self.msg += message + "\n\n"
@@ -104,7 +106,10 @@ def send_task_and_receive_data(node):
         if event is not None:
             while True:
                 if event is not None:
-
+                    if event['id'] in ['user_shopping_requirement_agent_status','shopping_plan_agent_status','amazon_agent_status','bronners_agent_status','worldmarket_agent_status','minted_agent_status','balsamhill_agent_status','shopping_solution_agent_status']:
+                        node_results = json.loads(event['value'].to_pylist()[0])
+                        results = node_results.get('node_results')
+                        click.node_info = results
                     if shopping_requirement_status is False:
                         while True:
                             if event['id'] == "user_shopping_requirement_status":
@@ -113,7 +118,6 @@ def send_task_and_receive_data(node):
                                 click.echo(results)
                                 data = click.input(
                                     " Shopping Requirement Suggestions :  ",
-                                    send=False
                                 )
                                 node.send_output("user_input", pa.array([clean_string(data)]))
                             if event['id'] == "user_shopping_requirement_result":
@@ -132,7 +136,6 @@ def send_task_and_receive_data(node):
                                 click.echo(results)
                                 data = click.input(
                                     " Agent Shopping Plan Suggestions:  ",
-                                    send=False
                                 )
                                 node.send_output("shopping_plan_user_input", pa.array([clean_string(data)]))
 
@@ -150,8 +153,7 @@ def send_task_and_receive_data(node):
                                 node_results = json.loads(event['value'].to_pylist()[0])
                                 results = node_results.get('node_results')
                                 click.echo(results)
-                                data = click.input(" Please re-enter your suggestions for the shopping plan :  ",
-                                                   send=False)
+                                data = click.input(" Please re-enter your suggestions for the shopping plan :  ",)
                                 node.send_output("shopping_solution_user_input", pa.array([clean_string(data)]))
 
                             if event['id'] == "shopping_solution_result":
@@ -176,6 +178,7 @@ def send_task_and_receive_data(node):
                         break
                     sys.stdout.flush()
                     event = node.next(timeout=5000)
+
 def main():
 
     parser = argparse.ArgumentParser(description="Simple arrow sender")

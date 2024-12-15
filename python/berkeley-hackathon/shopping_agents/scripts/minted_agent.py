@@ -22,6 +22,11 @@ class Operator:
             if dora_event['id'] == 'minted_search':
                 all_results = []
                 t1 = time.time()
+                send_output("minted_agent_status", pa.array([create_agent_output(step_name='minted_agent_status',
+                                                                                    output_data={'agent_name':'minted_agent','agent_status':'Running'},
+                                                                                    dataflow_status=os.getenv(
+                                                                                        'IS_DATAFLOW_END', False))]),
+                            dora_event['metadata'])
                 self.task = json.loads(load_node_result(dora_event["value"][0].as_py()))
                 llm_client = create_openai_client()
                 print('-------: ',self.task)
@@ -41,6 +46,11 @@ class Operator:
                                                                                output_data=all_results,
                                                                                dataflow_status=os.getenv(
                                                                                    'IS_DATAFLOW_END', False))]),
+                            dora_event['metadata'])
+                send_output("minted_agent_status", pa.array([create_agent_output(step_name='minted_agent_status',
+                                                                                    output_data={'agent_name':'minted_agent','agent_status':'Finish','use_time':time.time()-t1},
+                                                                                    dataflow_status=os.getenv(
+                                                                                        'IS_DATAFLOW_END', False))]),
                             dora_event['metadata'])
 
         return DoraStatus.CONTINUE

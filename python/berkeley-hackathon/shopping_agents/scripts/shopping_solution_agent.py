@@ -1,5 +1,7 @@
 import json
 import os
+import time
+
 from dora import Node, DoraStatus
 import pyarrow as pa
 from mofa.kernel.utils.util import load_agent_config, load_dora_inputs_and_task, create_agent_output, load_node_result
@@ -20,6 +22,7 @@ class Operator:
         send_output,
     ) -> DoraStatus:
         if dora_event["type"] == "INPUT":
+            t1 = time.time()
             if dora_event['id'] == 'shopping_planning_result':
                 self.shopping_planning_result = load_node_result(dora_event["value"][0].as_py())
             if dora_event['id'] == 'product_data':
@@ -38,6 +41,12 @@ class Operator:
                         i['shopping_web_result'] = load_node_result(dora_event["value"][0].as_py())
             print('----- self.shopping_agent_ids : ',self.shopping_agent_ids)
             agent_ready = all(d.get('agent_status') == True for d in self.shopping_agents)
+            send_output("shopping_solution_agent_status", pa.array([create_agent_output(step_name='shopping_solution_agent_status',
+                                                                             output_data={'agent_name': 'shopping_solution_agent',
+                                                                                          'agent_status': 'Running'},
+                                                                             dataflow_status=os.getenv(
+                                                                                 'IS_DATAFLOW_END', False))]),
+                        dora_event['metadata'])
             if agent_ready:
 
                 messages = [
@@ -56,6 +65,14 @@ class Operator:
                     self.shopping_planning_result = None
                     self.shopping_agent_ids = []
                     self.max_loop_num = 3
+                    send_output("shopping_solution_agent_status", pa.array([create_agent_output(step_name='shopping_solution_agent_status',
+                                                                                     output_data={
+                                                                                         'agent_name': 'shopping_solution_agent',
+                                                                                         'agent_status': 'Finish',
+                                                                                         'use_time': time.time() - t1},
+                                                                                     dataflow_status=os.getenv(
+                                                                                         'IS_DATAFLOW_END', False))]),
+                                dora_event['metadata'])
                 else:
                     send_output("shopping_solution_status",pa.array([create_agent_output(step_name='shopping_solution_status',output_data=result.json(),dataflow_status=os.getenv('IS_DATAFLOW_END', False))]),dora_event['metadata'])
                     self.max_loop_num +=1

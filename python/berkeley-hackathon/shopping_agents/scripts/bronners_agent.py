@@ -22,6 +22,13 @@ class Operator:
             if dora_event['id'] == 'bronners_search':
                 all_results = []
                 t1 = time.time()
+                send_output("bronners_agent_status", pa.array([create_agent_output(step_name='bronners_agent_status',
+                                                                                 output_data={
+                                                                                     'agent_name': 'bronners_agent',
+                                                                                     'agent_status': 'Running'},
+                                                                                 dataflow_status=os.getenv(
+                                                                                     'IS_DATAFLOW_END', False))]),
+                            dora_event['metadata'])
                 self.task = json.loads(load_node_result(dora_event["value"][0].as_py()))
                 llm_client = create_openai_client()
                 print('-------: ',self.task)
@@ -43,6 +50,14 @@ class Operator:
                                                                                output_data=all_results,
                                                                                dataflow_status=os.getenv(
                                                                                    'IS_DATAFLOW_END', False))]),
+                            dora_event['metadata'])
+                send_output("bronners_agent_status", pa.array([create_agent_output(step_name='bronners_agent_status',
+                                                                                 output_data={
+                                                                                     'agent_name': 'bronners_agent',
+                                                                                     'agent_status': 'Finish',
+                                                                                     'use_time': time.time() - t1},
+                                                                                 dataflow_status=os.getenv(
+                                                                                     'IS_DATAFLOW_END', False))]),
                             dora_event['metadata'])
 
         return DoraStatus.CONTINUE
