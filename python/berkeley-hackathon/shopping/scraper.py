@@ -6,6 +6,7 @@ import argparse
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
 import time
 from product_analysis_agent import ProductAnalysisAgent, prompt_template
 from dotenv import load_dotenv
@@ -106,9 +107,13 @@ class ProductScraper:
                 raise ValueError(f"Unsupported selector type: {selector_type}")
 
             print(f"[DEBUG] Using selector: {card_selector}")
-            WebDriverWait(self.driver, self.wait_time).until(
-                EC.presence_of_all_elements_located((By.XPATH, card_selector))
-            )
+            try:
+                WebDriverWait(self.driver, self.wait_time).until(
+                    EC.presence_of_all_elements_located((By.XPATH, card_selector))
+                )
+            except TimeoutException:
+                print(f"[INFO] No product cards found for query '{query}' on {site_name}. Returning empty list.")
+                return []
             card_elements = self.driver.find_elements(By.XPATH, card_selector)
             print(f"[INFO] Found {len(card_elements)} product cards on {site_name}.")
             return [card.get_attribute("outerHTML") for card in card_elements]
@@ -248,6 +253,7 @@ if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriv
         scroll=True,
         save=args.save
     )
+    """
 
     # Christmas Lights Etc
     christmaslightsetc_template = "https://www.christmaslightsetc.com/browse/?q={query}"
@@ -296,3 +302,5 @@ if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriv
         )
         print("[INFO] Not On The High Street Results with updated URLs:")
         print(notonthehighstreet_results)
+    """
+    
