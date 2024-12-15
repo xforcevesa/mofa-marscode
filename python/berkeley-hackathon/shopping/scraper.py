@@ -6,6 +6,7 @@ import argparse
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
 import time
 from product_analysis_agent import ProductAnalysisAgent, prompt_template
 from dotenv import load_dotenv
@@ -106,9 +107,13 @@ class ProductScraper:
                 raise ValueError(f"Unsupported selector type: {selector_type}")
 
             print(f"[DEBUG] Using selector: {card_selector}")
-            WebDriverWait(self.driver, self.wait_time).until(
-                EC.presence_of_all_elements_located((By.XPATH, card_selector))
-            )
+            try:
+                WebDriverWait(self.driver, self.wait_time).until(
+                    EC.presence_of_all_elements_located((By.XPATH, card_selector))
+                )
+            except TimeoutException:
+                print(f"[INFO] No product cards found for query '{query}' on {site_name}. Returning empty list.")
+                return []
             card_elements = self.driver.find_elements(By.XPATH, card_selector)
             print(f"[INFO] Found {len(card_elements)} product cards on {site_name}.")
             return [card.get_attribute("outerHTML") for card in card_elements]
@@ -220,13 +225,12 @@ class ProductScraper:
 
 if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriver --search-keyword "cup" -s
     parser = argparse.ArgumentParser(description="Fetch product cards using Selenium.")
-    # parser.add_argument("--driver-path", required=True, help="Path to the ChromeDriver executable.")
-    parser.add_argument("--driver-path", default=None, help="Path to the ChromeDriver executable.")
+    parser.add_argument("--driver-path", required=True, help="Path to the ChromeDriver executable.")
     parser.add_argument("--search-keyword", default="lights", help="Search keyword to query.")
     parser.add_argument("--save", "-s", action="store_true", help="Save formatted HTML to files.")
     args = parser.parse_args()
 
-    load_dotenv('.env.secret')
+    load_dotenv()
     api_key = os.getenv("API_KEY")
     agent = ProductAnalysisAgent(
         api_key=api_key,
@@ -249,6 +253,7 @@ if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriv
         scroll=True,
         save=args.save
     )
+    """
 
     # Christmas Lights Etc
     christmaslightsetc_template = "https://www.christmaslightsetc.com/browse/?q={query}"
@@ -275,27 +280,13 @@ if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriv
         print(christmaslightsetc_results)
     """
     # Not On The High Street
-    # notonthehighstreet_template = "https://www.notonthehighstreet.com/search?term={query}"
-    # notonthehighstreet_results = scraper.scrape(
-    #     url_template=notonthehighstreet_template,
-    #     query=args.search_keyword,
-    #     site_name="Not On The High Street",
-    #     selector_type="data-testid",
-    #     selector_value="product-card",
-    #     analysis_agent=agent,
-    #     model_name="gpt-4o-mini",
-    #     max_tokens=32000,
-    #     prompt_template=prompt_template,
-    #     scroll=True,
-    #     save=args.save
-    # )
-    christmaslightsetc_template = "https://www.christmaslightsetc.com/browse/?q={query}"
-    christmaslightsetc_results = scraper.scrape(
-        url_template=christmaslightsetc_template,
+    notonthehighstreet_template = "https://www.notonthehighstreet.com/search?term={query}"
+    notonthehighstreet_results = scraper.scrape(
+        url_template=notonthehighstreet_template,
         query=args.search_keyword,
-        site_name="Christmas Lights Etc",
-        selector_type="class",
-        selector_value="thumbnail pBox",
+        site_name="Not On The High Street",
+        selector_type="data-testid",
+        selector_value="product-card",
         analysis_agent=agent,
         model_name="gpt-4o-mini",
         max_tokens=32000,
@@ -303,19 +294,13 @@ if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriv
         scroll=True,
         save=args.save
     )
-    if christmaslightsetc_results:
-        # Add URL prefix for Christmas Lights Etc
-        christmaslightsetc_results.chunks = scraper.add_url_prefix(
-            christmaslightsetc_results.chunks,
-            "https://www.christmaslightsetc.com"
+    if notonthehighstreet_results:
+        # Add URL prefix for Not On The High Street
+        notonthehighstreet_results.chunks = scraper.add_url_prefix(
+            notonthehighstreet_results.chunks, 
+            "https://www.notonthehighstreet.com"
         )
-        print("[INFO] Christmas Lights Etc Results with updated URLs:")
-        print(christmaslightsetc_results)
-    # if notonthehighstreet_results:
-    #     # Add URL prefix for Not On The High Street
-    #     notonthehighstreet_results.chunks = scraper.add_url_prefix(
-    #         notonthehighstreet_results.chunks,
-    #         "https://www.notonthehighstreet.com"
-    #     )
-    #     print("[INFO] Not On The High Street Results with updated URLs:")
-    #     print(notonthehighstreet_results)
+        print("[INFO] Not On The High Street Results with updated URLs:")
+        print(notonthehighstreet_results)
+    """
+    
