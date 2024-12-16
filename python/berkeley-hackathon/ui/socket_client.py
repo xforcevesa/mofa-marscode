@@ -147,11 +147,12 @@ def draw_graph_at_sidebar():
         ]
 
     with placeholder.container():
+        placeholder.write(json_text)
         # Render boxes
-        placeholder.markdown(''.join([
-            round_corner_box(text, color)
-            for text, color in st.session_state["boxes"]
-        ]), unsafe_allow_html=True)
+        # placeholder.markdown(''.join([
+        #     round_corner_box(text, color)
+        #     for text, color in st.session_state["boxes"]
+        # ]), unsafe_allow_html=True)
 
 def draw_graph_at_main(label: str):
     global placeholder
