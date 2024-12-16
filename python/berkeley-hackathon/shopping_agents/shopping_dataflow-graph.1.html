@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body>
+    <div class="mermaid">
+        flowchart TB
+  hitl-agent
+  user-shopping-requirement-agent/op[user-shopping-requirement-agent]
+  shopping-plan-agent/op[shopping-plan-agent]
+  amazon-agent/op[amazon-agent]
+  bronners-agent/op[bronners-agent]
+  worldmarket-agent/op[worldmarket-agent]
+  minted-agent/op[minted-agent]
+  balsamhill-agent/op[balsamhill-agent]
+  christmaslightsetc-agent/op[christmaslightsetc-agent]
+  notonthehighstreet-agent/op[notonthehighstreet-agent]
+  shopping-solution-agent/op[shopping-solution-agent]
+  amazon-agent/op -- amazon_agent_status --> hitl-agent
+  amazon-agent/op -- amazon_shopping_result --> hitl-agent
+  balsamhill-agent/op -- balsamhill_agent_status --> hitl-agent
+  bronners-agent/op -- bronners_agent_status --> hitl-agent
+  christmaslightsetc-agent/op -- christmaslightsetc_agent_status --> hitl-agent
+  minted-agent/op -- minted_agent_status --> hitl-agent
+  notonthehighstreet-agent/op -- notonthehighstreet_agent_status --> hitl-agent
+  shopping-plan-agent/op -- shopping_plan_agent_status --> hitl-agent
+  shopping-plan-agent/op -- shopping_planning_result --> hitl-agent
+  shopping-plan-agent/op -- shopping_planning_status --> hitl-agent
+  shopping-solution-agent/op -- shopping_solution_agent_status --> hitl-agent
+  shopping-solution-agent/op -- shopping_solution_result --> hitl-agent
+  shopping-solution-agent/op -- shopping_solution_status --> hitl-agent
+  user-shopping-requirement-agent/op -- user_shopping_requirement_agent_status --> hitl-agent
+  user-shopping-requirement-agent/op -- user_shopping_requirement_result --> hitl-agent
+  user-shopping-requirement-agent/op -- user_shopping_requirement_status --> hitl-agent
+  worldmarket-agent/op -- worldmarket_agent_status --> hitl-agent
+  hitl-agent -- user_input --> user-shopping-requirement-agent/op
+  hitl-agent -- shopping_plan_user_input --> shopping-plan-agent/op
+  user-shopping-requirement-agent/op -- user_shopping_requirement_result as user_requirement --> shopping-plan-agent/op
+  shopping-plan-agent/op -- amazon_search --> amazon-agent/op
+  shopping-plan-agent/op -- bronners_search --> bronners-agent/op
+  shopping-plan-agent/op -- worldmarket_search --> worldmarket-agent/op
+  shopping-plan-agent/op -- minted_search --> minted-agent/op
+  shopping-plan-agent/op -- balsamhill_search --> balsamhill-agent/op
+  shopping-plan-agent/op -- christmaslightsetc_search --> christmaslightsetc-agent/op
+  shopping-plan-agent/op -- notonthehighstreet_search --> notonthehighstreet-agent/op
+  amazon-agent/op -- amazon_shopping_result --> shopping-solution-agent/op
+  balsamhill-agent/op -- balsamhill_shopping_result --> shopping-solution-agent/op
+  bronners-agent/op -- bronners_shopping_result --> shopping-solution-agent/op
+  christmaslightsetc-agent/op -- christmaslightsetc_shopping_result --> shopping-solution-agent/op
+  minted-agent/op -- minted_shopping_result --> shopping-solution-agent/op
+  notonthehighstreet-agent/op -- notonthehighstreet_shopping_result --> shopping-solution-agent/op
+  shopping-plan-agent/op -- shopping_planning_output_agents --> shopping-solution-agent/op
+  shopping-plan-agent/op -- shopping_planning_result --> shopping-solution-agent/op
+  hitl-agent -- shopping_solution_user_input --> shopping-solution-agent/op
+  worldmarket-agent/op -- worldmarket_shopping_result --> shopping-solution-agent/op
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'base' });
+    </script>
+</body>
+
+</html>

@@ -23,6 +23,8 @@ nodes:
       minted_agent_status: minted-agent/minted_agent_status
       balsamhill_agent_status: balsamhill-agent/balsamhill_agent_status
       shopping_solution_agent_status: shopping-solution-agent/shopping_solution_agent_status
+      christmaslightsetc_agent_status: christmaslightsetc-agent/christmaslightsetc_agent_status
+      notonthehighstreet_agent_status: notonthehighstreet-agent/notonthehighstreet_agent_status
 
   - id: user-shopping-requirement-agent
     operator:
@@ -47,6 +49,8 @@ nodes:
         - worldmarket_search
         - minted_search
         - balsamhill_search
+        - christmaslightsetc_search
+        - notonthehighstreet_search
         - shopping_planning_output_agents
         - shopping_plan_agent_status
   - id: amazon-agent
@@ -89,7 +93,22 @@ nodes:
       outputs:
         - balsamhill_shopping_result
         - balsamhill_agent_status
-
+  - id: christmaslightsetc-agent
+    operator:
+      python: scripts/christmaslightsetc_agent.py
+      inputs:
+        christmaslightsetc_search: shopping-plan-agent/christmaslightsetc_search
+      outputs:
+        - christmaslightsetc_shopping_result
+        - christmaslightsetc_agent_status
+  - id: notonthehighstreet-agent
+    operator:
+      python: scripts/notonthehighstreet_agent.py
+      inputs:
+        notonthehighstreet_search: shopping-plan-agent/notonthehighstreet_search
+      outputs:
+        - notonthehighstreet_shopping_result
+        - notonthehighstreet_agent_status
   - id: shopping-solution-agent
     operator:
       python: scripts/shopping_solution_agent.py
@@ -102,6 +121,8 @@ nodes:
         worldmarket_shopping_result: worldmarket-agent/worldmarket_shopping_result
         minted_shopping_result: minted-agent/minted_shopping_result
         balsamhill_shopping_result: balsamhill-agent/balsamhill_shopping_result
+        christmaslightsetc_shopping_result: christmaslightsetc-agent/christmaslightsetc_shopping_result
+        notonthehighstreet_shopping_result: notonthehighstreet-agent/notonthehighstreet_shopping_result
       outputs:
         - shopping_solution_status
         - shopping_solution_result

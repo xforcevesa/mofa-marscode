@@ -20,3 +20,13 @@ minted_agent:
 balsamhill_agent:
   inputs: balsamhill_search
   outputs: balsamhill_shopping_result
+
+
+christmaslightsetc_agent:
+  inputs: christmaslightsetc_search
+  outputs: christmaslightsetc_shopping_result
+
+
+notonthehighstreet_agent:
+  inputs: notonthehighstreet_search
+  outputs: notonthehighstreet_shopping_result

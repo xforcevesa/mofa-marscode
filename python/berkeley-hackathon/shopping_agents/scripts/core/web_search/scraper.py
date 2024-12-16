@@ -2,14 +2,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-import argparse
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
 import time
-from product_analysis_agent import ProductAnalysisAgent, prompt_template
-from dotenv import load_dotenv
+from .product_analysis_agent import ProductAnalysisAgent, prompt_template
 import os
 from typing import List
 from shopping_result import HtmlSearchTextChunk
@@ -225,23 +223,16 @@ class ProductScraper:
         else:
             return None
 
+def christmaslightsetc_scraper(search_keyword:str,driver_path:str=None,save:bool=False,limit_num:int=10,api_key:str=os.getenv("API_KEY")):
 
-if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriver --search-keyword "cup" -s
-    parser = argparse.ArgumentParser(description="Fetch product cards using Selenium.")
-    parser.add_argument("--driver-path", default=None, help="Path to the ChromeDriver executable.")
-    parser.add_argument("--search-keyword", default="lights", help="Search keyword to query.")
-    parser.add_argument("--save", "-s", action="store_true", help="Save formatted HTML to files.")
-    args = parser.parse_args()
-
-    load_dotenv('.env.secret')
-    api_key = os.getenv("API_KEY")
+    # api_key = os.getenv("API_KEY")
     agent = ProductAnalysisAgent(
         api_key=api_key,
     )
 
-    scraper = ProductScraper(driver_path=args.driver_path, headless=True, wait_time=10)
+    scraper = ProductScraper(driver_path=driver_path, headless=True, wait_time=10)
     """
-    # 1) Balsam Hill
+    # Balsam Hill
     balsamhill_template = "https://www.balsamhill.com/search?text={query}&sort=relevanceSort"
     balsamhill_results = scraper.scrape(
         url_template=balsamhill_template,
@@ -256,12 +247,13 @@ if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriv
         scroll=True,
         save=args.save
     )
+    """
 
-    # 2) Christmas Lights Etc
+    # Christmas Lights Etc
     christmaslightsetc_template = "https://www.christmaslightsetc.com/browse/?q={query}"
     christmaslightsetc_results = scraper.scrape(
         url_template=christmaslightsetc_template,
-        query=args.search_keyword,
+        query=search_keyword,
         site_name="Christmas Lights Etc",
         selector_type="class",
         selector_value="thumbnail pBox",
@@ -270,181 +262,127 @@ if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriv
         max_tokens=120000,
         prompt_template=prompt_template,
         scroll=True,
-        save=args.save
+        save=save,limit_num=limit_num
     )
     if christmaslightsetc_results:
         # Add URL prefix for Christmas Lights Etc
         christmaslightsetc_results.chunks = scraper.add_url_prefix(
-            christmaslightsetc_results.chunks, 
+            christmaslightsetc_results.chunks,
             "https://www.christmaslightsetc.com"
         )
         print("[INFO] Christmas Lights Etc Results with updated URLs:")
         print(christmaslightsetc_results)
-    
-    # 3) Not On The High Street
+        return christmaslightsetc_results
+    return ''
+def notonthehighstreet_scraper(search_keyword:str,driver_path:str=None,save:bool=False,limit_num:int=10,api_key:str=os.getenv("API_KEY")):
+    agent = ProductAnalysisAgent(
+        api_key=api_key,
+    )
+
+    scraper = ProductScraper(driver_path=driver_path, headless=True, wait_time=10)
     notonthehighstreet_template = "https://www.notonthehighstreet.com/search?term={query}"
     notonthehighstreet_results = scraper.scrape(
         url_template=notonthehighstreet_template,
-        query=args.search_keyword,
+        query=search_keyword,
         site_name="Not On The High Street",
         selector_type="data-testid",
         selector_value="product-card",
         analysis_agent=agent,
         model_name="gpt-4o-mini",
-        max_tokens=32000,
+        max_tokens=96000,
         prompt_template=prompt_template,
         scroll=True,
-        save=args.save
+        save=save
     )
     if notonthehighstreet_results:
         # Add URL prefix for Not On The High Street
         notonthehighstreet_results.chunks = scraper.add_url_prefix(
-            notonthehighstreet_results.chunks, 
+            notonthehighstreet_results.chunks,
             "https://www.notonthehighstreet.com"
         )
         print("[INFO] Not On The High Street Results with updated URLs:")
         print(notonthehighstreet_results)
+        return notonthehighstreet_results
+    return ''
+
+# if __name__ == "__main__": # python scraper.py --driver-path /usr/bin/chromedriver --search-keyword "cup" -s
+#     parser = argparse.ArgumentParser(description="Fetch product cards using Selenium.")
+#     parser.add_argument("--driver-path", default=None, help="Path to the ChromeDriver executable.")
+#     parser.add_argument("--search-keyword", default="lights", help="Search keyword to query.")
+#     parser.add_argument("--save", "-s", action="store_true", help="Save formatted HTML to files.")
+#     args = parser.parse_args()
+#
+#     load_dotenv('.env.secret')
+#     api_key = os.getenv("API_KEY")
+#     agent = ProductAnalysisAgent(
+#         api_key=api_key,
+#     )
+#
+#     scraper = ProductScraper(driver_path=args.driver_path, headless=True, wait_time=10)
+#     """
+#     # Balsam Hill
+#     balsamhill_template = "https://www.balsamhill.com/search?text={query}&sort=relevanceSort"
+#     balsamhill_results = scraper.scrape(
+#         url_template=balsamhill_template,
+#         query=args.search_keyword,
+#         site_name="Balsam Hill",
+#         selector_type="class",
+#         selector_value="productCard_product-listing-card-wrapper__",
+#         analysis_agent=agent,
+#         model_name="gpt-4o-mini",
+#         max_tokens=32000,
+#         prompt_template=prompt_template,
+#         scroll=True,
+#         save=args.save
+#     )
+#     """
+#
+#     # Christmas Lights Etc
+#     christmaslightsetc_template = "https://www.christmaslightsetc.com/browse/?q={query}"
+#     christmaslightsetc_results = scraper.scrape(
+#         url_template=christmaslightsetc_template,
+#         query=args.search_keyword,
+#         site_name="Christmas Lights Etc",
+#         selector_type="class",
+#         selector_value="thumbnail pBox",
+#         analysis_agent=agent,
+#         model_name="gpt-4o-mini",
+#         max_tokens=120000,
+#         prompt_template=prompt_template,
+#         scroll=True,
+#         save=args.save
+#     )
+#     if christmaslightsetc_results:
+#         # Add URL prefix for Christmas Lights Etc
+#         christmaslightsetc_results.chunks = scraper.add_url_prefix(
+#             christmaslightsetc_results.chunks,
+#             "https://www.christmaslightsetc.com"
+#         )
+#         print("[INFO] Christmas Lights Etc Results with updated URLs:")
+#         print(christmaslightsetc_results)
+#     """
+#     # Not On The High Street
+#     notonthehighstreet_template = "https://www.notonthehighstreet.com/search?term={query}"
+#     notonthehighstreet_results = scraper.scrape(
+#         url_template=notonthehighstreet_template,
+#         query=args.search_keyword,
+#         site_name="Not On The High Street",
+#         selector_type="data-testid",
+#         selector_value="product-card",
+#         analysis_agent=agent,
+#         model_name="gpt-4o-mini",
+#         max_tokens=32000,
+#         prompt_template=prompt_template,
+#         scroll=True,
+#         save=args.save
+#     )
+#     if notonthehighstreet_results:
+#         # Add URL prefix for Not On The High Street
+#         notonthehighstreet_results.chunks = scraper.add_url_prefix(
+#             notonthehighstreet_results.chunks,
+#             "https://www.notonthehighstreet.com"
+#         )
+#         print("[INFO] Not On The High Street Results with updated URLs:")
+#         print(notonthehighstreet_results)
+#     """
     
-    # 4) Folksy
-    floksy_template = "https://folksy.com/search/lights?production-b%5Bquery%5D={query}&production-b%5Brange%5D%5Bprice%5D=0%3A10000"
-    floksy_results = scraper.scrape(
-        url_template=floksy_template,
-        query=args.search_keyword,
-        site_name="Folksy",
-        selector_type="class",
-        selector_value="ais-InfiniteHits-item",
-        analysis_agent=agent,
-        model_name="gpt-4o-mini",
-        max_tokens=32000,
-        prompt_template=prompt_template,
-        scroll=True,
-        save=args.save
-    )
-    
-    # 5) Uncommon Goods
-    uncommongoods_template = "https://www.uncommongoods.com/search?q={query}"
-    uncommongoods_results = scraper.scrape(
-        url_template=uncommongoods_template,
-        query=args.search_keyword,
-        site_name="Uncommon Goods",
-        selector_type="class",
-        selector_value="item-widget",
-        analysis_agent=agent,
-        model_name="gpt-4o-mini",
-        max_tokens=32000,
-        prompt_template=prompt_template,
-        scroll=True,
-        save=args.save
-    )
-    
-    # 6) Garmentory
-    garmentory_template = "https://www.garmentory.com/search?q={query}"
-    garmentory_results = scraper.scrape(
-        url_template=garmentory_template,
-        query=args.search_keyword,
-        site_name="Garmentory",
-        selector_type="class",
-        selector_value="product-grid__grid-item",
-        analysis_agent=agent,
-        model_name="gpt-4o-mini",
-        max_tokens=32000,
-        prompt_template=prompt_template,
-        scroll=True,
-        save=args.save
-    )
-    
-    # 7) La Garçonne
-    lagarconne_template = "https://lagarconne.com/search?q={query}+tag%3Aproduct_state%3Dcurrent"
-    lagarconne_results = scraper.scrape(
-        url_template=lagarconne_template,
-        query=args.search_keyword,
-        site_name="La Garçonne",
-        selector_type="class",
-        selector_value="lg-product-list-item",
-        analysis_agent=agent,
-        model_name="gpt-4o-mini",
-        max_tokens=32000,
-        prompt_template=prompt_template,
-        scroll=True,
-        save=args.save
-    )
-    
-    # 8) END. Clothing
-    endclothing_template = "https://www.endclothing.com/catalogsearch/results?q={query}"
-    endclothing_results = scraper.scrape(
-        url_template=endclothing_template,
-        query=args.search_keyword,
-        site_name="END. Clothing",
-        selector_type="class",
-        selector_value="styles__ProductCardSC",
-        analysis_agent=agent,
-        model_name="gpt-4o-mini",
-        max_tokens=32000,
-        prompt_template=prompt_template,
-        scroll=True,
-        save=args.save
-    )
-    
-    # 9) Trouva
-    trouva_template = "https://www.trouva.com/search/{query}"
-    trouva_results = scraper.scrape(
-        url_template=trouva_template,
-        query=args.search_keyword,
-        site_name="Trouva",
-        selector_type="class",
-        selector_value="new-product-card",
-        analysis_agent=agent,
-        model_name="gpt-4o-mini",
-        max_tokens=32000,
-        prompt_template=prompt_template,
-        scroll=True,
-        save=args.save
-    )
-    
-    # 10) The Citizenry
-    thecitizenry_template = "https://www.the-citizenry.com/collections/shop?q={query}&v=products"
-    thecitizenry_results = scraper.scrape(
-        url_template=thecitizenry_template,
-        query=args.search_keyword,
-        site_name="The Citizenry",
-        selector_type="class",
-        selector_value="is-product",
-        analysis_agent=agent,
-        model_name="gpt-4o-mini",
-        max_tokens=32000,
-        prompt_template=prompt_template,
-        scroll=True,
-        save=args.save
-    )
-    
-    # 11) The Grommet
-    thegrommet_template = "https://thegrommet.com/product-search?q={query}"
-    thegrommet_results = scraper.scrape(
-        url_template=thegrommet_template,
-        query=args.search_keyword,
-        site_name="The Grommet",
-        selector_type="class",
-        selector_value="group relative flex w-full min-w-0 max-w-[764px] rounded-10 border-gray-1350 bg-white p-0 md:mb-[14px] md:min-w-fit md:border md:shadow-card cursor-pointer md:hover:bg-gray-2150 mb-[26px]",
-        analysis_agent=agent,
-        model_name="gpt-4o-mini",
-        max_tokens=32000,
-        prompt_template=prompt_template,
-        scroll=True,
-        save=args.save
-    )
-    """
-    # 12) Hard to Find
-    hardtofind_template = "https://www.hardtofind.com.au/search/elastic?q={query}"
-    hardtofind_results = scraper.scrape(
-        url_template=hardtofind_template,
-        query=args.search_keyword,
-        site_name="Hard to Find",
-        selector_type="class",
-        selector_value="column is-one-quarter-tablet is-one-quarter-desktop  is-one-quarter-widescreen is-half-mobile",
-        analysis_agent=agent,
-        model_name="gpt-4o-mini",
-        max_tokens=32000,
-        prompt_template=prompt_template,
-        scroll=True,
-        save=args.save
-    )
