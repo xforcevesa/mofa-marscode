@@ -1,169 +1,117 @@
-# **项目名: Hello_World**
 
-## **团队名称:**
+# **智能购物代理系统开发方案**
 
-MoFa团队
+## **一、项目概述**
 
-**组员：**
+本项目旨在搭建一套通过多代理（Agents）协同工作的智能购物系统。该系统由一个人机交互代理（HITL-Agent）和多个功能代理组成，通过自动化的任务分解与执行来满足用户的个性化购物需求。用户输入购物需求（如预算、喜好、用途）后，系统将自动分解为多个子任务（如特定平台的产品搜索）、调用相应的电商代理执行查询，并整合结果形成最终的购物方案。
 
-- 睿类文特 (GitCode用户名: zonghuanwu)
-- ChenZi (GitCode用户名: chenzi00103)
+本系统的核心特色在于其模块化与可扩展性：通过独立的代理（如 Amazon、Bronners、Worldmarket、Minted、Balsamhill、Christmaslightsetc、Notonthehighstreet 等）对接各电商平台，实现数据来源的平行扩展。购物规划和需求解析分离，支持动态调整用户需求和方案，让系统可以在用户反馈下快速迭代并优化最终推荐。
 
-## **项目地址:**
+---
 
-[GitCode Repo 地址](https://gitcode.com/moxin-org/mofa/overview)
+## **二、系统目标**
 
-------
+- **自动化需求解析**：从用户文本输入中提取购物预算、产品偏好、用途场景等关键信息。
+- **任务分解与规划**：根据用户需求自动生成查询任务清单（如对多个电商平台的搜索指令）。
+- **多源信息聚合**：从不同电商代理获取产品信息（价格、规格、库存等），进行跨平台比较与筛选。
+- **方案生成与反馈**：为用户提供候选购物方案，并支持用户对方案的反馈与再次调整。
 
-## **安装与运行手册**
+---
 
-### **环境依赖:**
+## **三、系统架构与数据流**
 
-1. **Rust** (用于运行 Dora-RS 框架)
-2. **MoFa 框架库**
+### **1. 关键节点（Agents）简述**
 
-### **安装步骤:**
+1. **HITL-Agent（hitl-agent）**  
+   - **角色**：用户与系统交互的入口。  
+   - **功能**：  
+     - 接收用户初始需求 (`user_input`)：例如“我要在预算8000元内买一台用于游戏的笔记本电脑”。  
+     - 接收用户对方案的反馈 (`shopping_solution_user_input`、`shopping_plan_user_input`)，如“更喜欢NVIDIA显卡”或“预算提高到8500元”等。  
+   - **输出**：  
+     - 将用户输入发送给下游的用户需求解析代理和购物规划代理。
+   - **输入**：  
+     - 从下游代理处获取需求解析状态、规划状态、最终方案和各代理的执行状态，便于与用户交互和展示方案。
 
-### **运行程序:**
+2. **用户购物需求代理（user-shopping-requirement-agent）**  
+   - **输入**：`user_input`（来自hitl-agent）  
+   - **输出**：  
+     - `user_shopping_requirement_status`：需求分析状态（如成功解析/需要补充信息）  
+     - `user_shopping_requirement_result`：解析后的用户需求要点（预算、喜好品牌、用途场景）  
+     - `user_shopping_requirement_agent_status`：该代理自身状态信息（健康度、执行时间、错误信息等）
 
-1. **运行智能体框架:**
-   ```bash
-   dora up && dora build hello_world_dataflow.yml && dora start hello_world_dataflow.yml
-   ```
+   **作用**：将用户模糊、自然语言需求解析为结构化数据，为后续规划做准备。
 
-2. **启动任务输入端:**
-   - 打开另一个终端窗口，运行 `terminal-input`。
-   - 在 `terminal-input` 中输入任务指令即可与智能体交互。
+3. **购物规划代理（shopping-plan-agent）**  
+   - **输入**：  
+     - `shopping_plan_user_input`（来自hitl-agent，用于方案规划的额外输入，如用户对方案的特定要求）  
+     - `user_shopping_requirement_result`（来自需求代理的结构化需求信息）
+   - **输出**：  
+     - `shopping_planning_status` / `shopping_planning_result`：规划状态与结果（如已生成查询任务列表）  
+     - `amazon_search`、`bronners_search`、`worldmarket_search`、`minted_search`、`balsamhill_search`、`christmaslightsetc_search`、`notonthehighstreet_search`：针对不同电商代理的搜索指令  
+     - `shopping_planning_output_agents`：规划结果中涉及的目标代理列表，便于后续整合  
+     - `shopping_plan_agent_status`：状态信息（如规划完成时间、规划质量指标）
 
-------
+   **作用**：根据用户需求，将任务分解为多个电商搜索指令，为各平台代理提供明确的查询参数（例如搜索价格区间、品牌、产品类型）。
 
-## **案例介绍**
+4. **各电商代理**（如 `amazon-agent`、`bronners-agent`、`worldmarket-agent`、`minted-agent`、`balsamhill-agent`、`christmaslightsetc-agent`、`notonthehighstreet-agent`）  
+   - **输入**：对应的 ..._search 指令（如 `amazon_search`）  
+   - **输出**：  
+     - 对应的 ..._shopping_result（如 `amazon_shopping_result`）：获取到的电商平台产品列表、价格信息和其他数据  
+     - 对应的 ..._agent_status：执行状态（成功、失败、请求耗时等）
 
-**Hello_World** 是一个用于测试项目是否运行的工具，展示了如何使用 MoFa 框架构建智能体。它实现了最基本的智能体设计模式：定制的大语言模型提示与大语言模型推理。
+   **作用**：执行特定平台的产品查询与数据获取，为方案生成提供候选商品数据。
 
-### **突破点:**
+5. **购物解决方案代理（shopping-solution-agent）**  
+   - **输入**：  
+     - `shopping_planning_result`：来自规划代理的结果，用于参照用户需求  
+     - `shopping_solution_user_input`：用户针对最终方案的反馈  
+     - `shopping_planning_output_agents`：规划阶段所涉及的电商代理列表  
+     - 各电商代理的 ..._shopping_result：来自不同平台的产品数据
+   - **输出**：  
+     - `shopping_solution_status` / `shopping_solution_result`：最终方案的状态与结果（如已生成3个备选方案）  
+     - `shopping_solution_agent_status`：该代理自身状态信息
 
-- **简化智能体开发流程：** 通过模板化配置，用户可以快速生成定制化智能体。
-- **分布式计算支持：** 使用 Dora-RS 框架，确保多个智能体之间的高效协作。
-- **灵活的提示定制：** 允许用户通过编辑配置文件轻松定制智能体的行为和响应。
+   **作用**：根据用户需求和各平台返回的数据，对候选产品进行筛选、组合与排序，生成最终购物方案。如多个方案超出预算，则提供替换建议；若用户不满意，可依其反馈重新计算方案。
 
-------
+---
 
-## **技术开发介绍**
+### **2. 数据流示例**
 
-### **使用的框架与工具:**
+1. 用户在 HITL-Agent 输入需求 → HITL-Agent 将输入转发给 user-shopping-requirement-agent 解析 → user-shopping-requirement-agent 输出结构化结果与状态 → shopping-plan-agent 使用需求结果与用户附加输入生成搜索指令 → 各电商代理根据搜索指令返回产品数据 → shopping-solution-agent 整合电商数据并生成最终方案 → HITL-Agent 接收方案和状态后向用户展示。
 
-- **Dora-RS 框架:** 负责智能体间的分布式计算，确保多个智能体在任务执行中的顺畅协作。
-- **MoFa 框架 (MoXin智能体组合框架):** 为智能体之间的交互和编排提供了强大的基础设施。
+---
 
-### **技术难点:**
+## **四、工作流程示例**
 
-### **技术难点**
+**情境**：用户想购买一款适合家庭影院环境的投影仪，预算5000元。
 
-- **通过 Dora 连接不同节点进行协作：**
-  实现多个智能体在分布式环境下的高效协作，确保各节点之间的数据同步与通信稳定。需要解决网络延迟、节点故障恢复以及任务分配的优化问题，以保证整体系统的高可用性和一致性。
+1. **用户输入**：  
+   在 HITL-Agent 中输入：“我想买一台预算5000元的投影仪，用来在家看电影。”
 
-- **创建一个可自由运行的 Agent：**
-  设计智能体架构，使其具备独立运行的能力，能够根据不同任务需求动态调整资源分配和执行策略。确保 Agent 的高效性和灵活性，同时支持多种运行环境和扩展接口，以适应不断变化的应用场景。
+2. **需求解析**：  
+   user-shopping-requirement-agent 从输入中提取“预算：5000元、产品类型：投影仪、使用场景：家庭影院”。
 
-- **用户自定义配置的灵活性与安全性：**
-  提供强大的配置接口，允许用户自由定制提示词和参数设置，以满足多样化的应用需求。同时，必须确保配置过程的安全性，防止潜在的配置错误或安全漏洞，通过权限控制和验证机制保障系统的稳定运行。
+3. **任务规划**：  
+   shopping-plan-agent 接收需求解析结果，根据预设的电商平台，生成 `amazon_search`、`worldmarket_search` 等指令（如搜索关键词“home theater projector”、价格范围0-5000元）。
 
-------
+4. **平台查询**：  
+   amazon-agent、worldmarket-agent 等收到各自的搜索指令并查询数据源，返回相应的投影仪产品数据（价格、品牌、分辨率、用户评价）。
 
-## **功能说明**
+5. **方案生成**：  
+   shopping-solution-agent 收集各平台结果，对比价格、性能和用户评价，生成2-3个备选方案供用户选择，并返回给 HITL-Agent。
 
-Hello_World 是 MoFa 中最基本的智能体，设计模式为定制的大语言模型提示加上大语言模型推理。它主要用于测试框架的运行情况以及演示智能体的基本功能。
+6. **用户反馈**：  
+   若用户对方案不满意，可以在 HITL-Agent 输入反馈（如“我希望分辨率更高一点，预算增加到6000元”），系统将再次进行规划与查询，直至用户满意。
 
-### **使用场景**
+---
 
-在需要定制大语言模型提示的情况下使用 Hello_World。例如：
 
-- 创建一个以“爱因斯坦”口吻与用户聊天的智能体。
-- 创建一个将一个复杂问题拆分成五个小问题的智能体。
 
-### **配置方法**
+## **五、总结**
 
-基本的配置原理是通过修改 hello_world 模板中的配置信息，生成一个定制的智能体。
-
-#### **方法一：使用文本编辑器编辑 MoFa 配置文件**
-
-1. **模板拷贝：**
-   - 将包含 hello_world 模板的子目录拷贝到指定目录（例如 `hello_world`）。
-   - 目录结构如下：
-
-     | 文件                          | 说明                                                         |
-     |-------------------------------|--------------------------------------------------------------|
-     | `hello_world_dataflow.yml`    | Dora 数据流配置文件                                           |
-     | `configs/agent.yml`           | MoFa 配置文件，包括大语言模型相关参数配置和定制提示参数配置等 |
-     | `scripts/agent.py`            | 智能体功能实现的 Python Operator 工具                        |
-
-
-2. **修改配置：**
-
-   | 文件                            | 说明                                                         |
-   |---------------------------------|--------------------------------------------------------------|
-   | `hello_world_dataflow.yml`      | 更改 `build: pip install -e ../../../node-hub/terminal-input` 的路径（可使用绝对路径）。 |
-   | `configs/agent.yml`             | 根据定制需求，修改 Prompts 和大语言模型参数配置，包括 Rag。 |
-   | `scripts/agent.py`              | 修改 `yaml_file_path` 变量对应的 `configs` 的 yml 文件路径。   |
-
-
-
-## **运行 Agent**
-
-1. **启动智能体框架：**
-   ```bash
-   dora up && dora build hello_world_dataflow.yml && dora start hello_world_dataflow.yml
-   ```
-
-2. **启动任务输入端：**
-   - 打开另一个终端窗口，运行 `terminal-input`。
-   - 在 `terminal-input` 中输入任务指令，与智能体进行交互。
-
-
-## **案例展示**
-
-### **案例 1: 描写自然的诗词**
-
-**提示:** 你是谁？
-
-**Hello_World 案例输出:**
-```
-Hello, World!
-```
-
-**ChatGPT 输出:**
-```
-你好！我是ChatGPT，由OpenAI开发的人工智能语言模型。我可以帮助回答问题、提供信息、协助完成各种任务。如果你有任何问题或需要帮助，请随时告诉我！
-```
-
-**分析:**
-
-- **Hello_World** 通过简单的提示回应 "Hello, World!"，验证了基本的运行状态。
-- **ChatGPT** 则生成了生动的自然描写，展示了更高层次的语言生成能力。
-
-### **案例 2: 历史典故的诗词**
-
-**提示:** 关于英雄的历史感怀诗
-
-**Hello_World 输出:**
-```
-Hello, World!
-```
-
-**ChatGPT 输出:**
-```
-英雄万里行，铁马踏沙场，古今皆壮志，山河共荣光。
-```
-
-**分析:**
-
-- **Hello_World** 依然返回 "Hello, World!"，未能完成复杂任务。
-- **ChatGPT** 则生成了富有历史感怀的诗句，展现出深刻的历史反思和英雄主义情怀。
-
-
-
-1. 优化展示内容
-2. 整体流程数据流动描述图
-3. 
+该智能购物代理系统在模块化和可扩展性方面具备显著优势：  
+- 用户输入 → 需求解析 → 方案规划 → 多平台查询 → 方案整合 → 用户反馈的流程清晰且易于扩展。  
+- 引入多电商代理使数据来源更加多元，提高推荐可信度和多样性。  
+- 系统可根据用户反馈快速迭代推荐方案，提高用户满意度。  
+- 通过状态输出与监控机制，可持续优化系统性能与稳定性。
 
