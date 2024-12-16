@@ -32,7 +32,7 @@ class Click:
         while True:
             with self.node_info_lock:
                 self.send_message(self.conn, str(self.node_info), signal=True)
-            time.sleep(1)
+            time.sleep(0.1)
 
     def echo(self, message):
         self.msg += message + "\n\n"
@@ -130,6 +130,7 @@ def send_task_and_receive_data(node):
                         while True:
                             click_log(event=event, click=click)
                             if event['id'] == "user_shopping_requirement_status":
+                                click_log(event=event, click=click)
                                 node_results = json.loads(event['value'].to_pylist()[0])
                                 results = node_results.get('node_results')
                                 click.echo(results)
@@ -137,6 +138,7 @@ def send_task_and_receive_data(node):
                                     " Shopping Requirement Suggestions :  ",
                                 )
                                 node.send_output("user_input", pa.array([clean_string(data)]))
+                                click_log(event=event, click=click)
                             if event['id'] == "user_shopping_requirement_result":
                                 click_log(event=event, click=click)
                                 node_results = json.loads(event['value'].to_pylist()[0])
@@ -144,34 +146,43 @@ def send_task_and_receive_data(node):
                                 click.echo("This is the user's requirement description.")
                                 click.echo(results)
                                 shopping_requirement_status = True
+                                click_log(event=event, click=click)
                                 break
+                            click_log(event=event, click=click)
                             event = node.next(timeout=5000)
                     if shopping_planning_status is False:
                         while True:
                             click_log(event=event, click=click)
                             if event['id'] == "shopping_planning_status":
+                                click_log(event=event, click=click)
                                 node_results = json.loads(event['value'].to_pylist()[0])
                                 results = node_results.get('node_results')
                                 click.echo(results)
+                                click_log(event=event, click=click)
                                 data = click.input(
                                     " Agent Shopping Plan Suggestions:  ",
                                 )
                                 node.send_output("shopping_plan_user_input", pa.array([clean_string(data)]))
+                                click_log(event=event, click=click)
 
                             if event['id'] == "shopping_planning_result":
+                                click_log(event=event, click=click)
                                 node_results = json.loads(event['value'].to_pylist()[0])
                                 results = node_results.get('node_results')
+                                click_log(event=event, click=click)
                                 click.echo("This is the user's requirement description.")
                                 click.echo(results)
                                 shopping_requirement_status = True
                                 break
+                            click_log(event=event, click=click)
                             event = node.next(timeout=5000)
+
 
                     click_log(event=event, click=click)
                     node_results = json.loads(event['value'].to_pylist()[0])
                     results = node_results.get('node_results')
                     dataflow_end = node_results.get('dataflow_status', False)
-
+                    click_log(event=event, click=click)
                     if dataflow_end == False:
                         click.echo(f"{node_results.get('step_name', '')}: {results} ", )
                     else:
@@ -181,7 +192,7 @@ def send_task_and_receive_data(node):
                         break
                     sys.stdout.flush()
                     event = node.next(timeout=5000)
-
+                    click_log(event=event, click=click)
 def main():
 
     parser = argparse.ArgumentParser(description="Simple arrow sender")

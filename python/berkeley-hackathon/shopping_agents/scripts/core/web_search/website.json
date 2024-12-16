@@ -1,0 +1,76 @@
+{
+    "sites": [
+
+      {
+        "website_name": "Christmas Lights Etc",
+        "website_search_url": "https://www.christmaslightsetc.com/browse/?q={query}",
+        "selector_type": "class",
+        "selector_value": "thumbnail pBox",
+        "description": "A platform dedicated to Christmas lights and related decorations, offering a wide range of reliable, high-quality products."
+      },
+      {
+        "website_name": "Folksy",
+        "website_search_url": "https://folksy.com/search/lights?production-b%5Bquery%5D={query}&production-b%5Brange%5D%5Bprice%5D=0%3A10000",
+        "selector_type": "class",
+        "selector_value": "ais-InfiniteHits-item",
+        "description": "A British online craft marketplace showcasing handmade products and original works by independent creators."
+      },
+      {
+        "website_name": "Uncommon Goods",
+        "website_search_url": "https://www.uncommongoods.com/search?q={query}",
+        "selector_type": "class",
+        "selector_value": "item-widget",
+        "description": "A U.S. retailer offering creative gifts and distinctive home products, focusing on innovative and unique selections."
+      },
+      {
+        "website_name": "Garmentory",
+        "website_search_url": "https://www.garmentory.com/search?q={query}",
+        "selector_type": "class",
+        "selector_value": "product-grid__grid-item",
+        "description": "A fashion platform aggregating independent designers and boutiques, ideal for finding unique clothing and accessories."
+      },
+      {
+        "website_name": "La Garçonne",
+        "website_search_url": "https://lagarconne.com/search?q={query}+tag%3Aproduct_state%3Dcurrent",
+        "selector_type": "class",
+        "selector_value": "lg-product-list-item",
+        "description": "An online boutique featuring minimalist and high-end independent designer brands, emphasizing quality and aesthetic."
+      },
+      {
+        "website_name": "END. Clothing",
+        "website_search_url": "https://www.endclothing.com/catalogsearch/results?q={query}",
+        "selector_type": "class",
+        "selector_value": "styles__ProductCardSC",
+        "description": "A UK retailer known for its curated selection of contemporary and designer menswear, footwear, and accessories."
+      },
+      {
+        "website_name": "Trouva",
+        "website_search_url": "https://www.trouva.com/search/{query}",
+        "selector_type": "class",
+        "selector_value": "new-product-card",
+        "description": "A platform connecting customers with independent boutiques across Europe, offering distinctive lifestyle products."
+      },
+      {
+        "website_name": "The Citizenry",
+        "website_search_url": "https://www.the-citizenry.com/collections/shop?q={query}&v=products",
+        "selector_type": "class",
+        "selector_value": "is-product",
+        "description": "An e-commerce site offering artisan-crafted home goods from around the world, focusing on sustainability and cultural storytelling."
+      },
+      {
+        "website_name": "The Grommet",
+        "website_search_url": "https://thegrommet.com/product-search?q={query}",
+        "selector_type": "class",
+        "selector_value": "group relative flex w-full min-w-0 max-w-[764px] rounded-10 border-gray-1350 bg-white p-0 md:mb-[14px] md:min-w-fit md:border md:shadow-card cursor-pointer md:hover:bg-gray-2150 mb-[26px]",
+        "description": "A discovery platform introducing consumers to innovative, unique, and emerging brands and products."
+      },
+      {
+        "website_name": "Hard to Find",
+        "website_search_url": "https://www.hardtofind.com.au/search/elastic?q={query}",
+        "selector_type": "class",
+        "selector_value": "column is-one-quarter-tablet is-one-quarter-desktop  is-one-quarter-widescreen is-half-mobile",
+        "description": "An Australian marketplace showcasing creative and niche gifts and products, catering to those seeking distinctive items."
+      }
+    ]
+}
+  
