@@ -1,6 +1,6 @@
 from typing import List
 from openai import OpenAI
-from shopping_result import HtmlSearchText
+from .shopping_result import HtmlSearchText
 import tiktoken
 
 prompt_template="""

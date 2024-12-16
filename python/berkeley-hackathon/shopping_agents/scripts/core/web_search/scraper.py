@@ -10,7 +10,7 @@ import time
 from .product_analysis_agent import ProductAnalysisAgent, prompt_template
 import os
 from typing import List
-from shopping_result import HtmlSearchTextChunk
+from .shopping_result import HtmlSearchTextChunk
 
 
 class ProductScraper:
