@@ -31,6 +31,7 @@ class Click:
         while True:
             try:
                 if send:
+                    Click.send_message(self.conn, str(self.node_info))
                     Click.send_message(self.conn, self.msg)
                 self.msg = ""
                 return Click.receive_message(self.conn)
