@@ -3,3 +3,5 @@ local_cache/**
 data/**
 .env.secret
 .demo.py
+*.html
+*.txt
