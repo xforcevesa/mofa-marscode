@@ -7,8 +7,6 @@ from mofa.utils.ai.conn import load_llm_api_key_by_env_file
 from openai import chat
 import openai
 
-json_text = ""
-
 class OpenAIClient:
     def __init__(self, api_key=load_llm_api_key_by_env_file(dotenv_path="../shopping_agents/.env.secret")):
         self.api_key = api_key
@@ -46,31 +44,65 @@ class OpenAIClient:
 
         return response_text
 
-def send_message(sock, message):
+def send_message(sock, message, signal=False):
     """Send an arbitrary-sized string over a socket."""
     message = message.encode('utf-8')  # Encode the string into bytes
     message_length = len(message)
-    sock.sendall(f"{message_length:<10}".encode('utf-8'))  # Send header with fixed length
+    if signal:
+        sock.sendall(f"S{message_length:<10}".encode('utf-8'))  # Send header with fixed length
+    else:
+        sock.sendall(f"N{message_length:<10}".encode('utf-8'))  # Send header with fixed length
     sock.sendall(message)  # Send the actual message
 
-def receive_message(sock):
+def _receive_message(sock):
     """Receive an arbitrary-sized string over a socket."""
-    header = sock.recv(10).decode('utf-8')  # Read the 10-byte header
+    header = sock.recv(11).decode('utf-8')  # Read the 10-byte header
     if not header:
         return None
-    message_length = int(header.strip())  # Get the message length from the header
+    message_length = int(header[1:].strip())  # Get the message length from the header
     data = b""
     while len(data) < message_length:
         chunk = sock.recv(message_length - len(data))
         if not chunk:
             break
         data += chunk
-    return data.decode('utf-8')  # Decode the bytes into a string
+    return (header[0], data.decode('utf-8'))  # Decode the bytes into a string
+
+# Sidebar title
+st.sidebar.title("Dataflow Status")
+
+placeholder = st.sidebar.empty()
+
+def draw_graph_at_sidebar(json_text: str):
+    global placeholder
+    # Sidebar graph layout
+    if "boxes" not in st.session_state:
+        import yaml
+        yaml_file = open("../shopping_agents/shopping_dataflow.yml", "r")
+        yaml_dict = yaml.safe_load(yaml_file)
+        st.session_state["boxes"] = [
+            [item["id"], "#800080"] for item in yaml_dict["nodes"]
+        ]
+
+    with placeholder.container():
+        placeholder.write(json_text)
+        # Render boxes
+        # placeholder.markdown(''.join([
+        #     round_corner_box(text, color)
+        #     for text, color in st.session_state["boxes"]
+        # ]), unsafe_allow_html=True)
+
+def receive_message(sock):
+    """Receive an arbitrary-sized string over a socket."""
+    while True:
+        header, message = _receive_message(sock)
+        if header == "N":
+            return message
+        elif header == "S":
+            draw_graph_at_sidebar(json_text=message)
 
 def response_prompt(prompt: str):
-    global json_text
     send_message(st.session_state.sock, prompt)
-    json_text = receive_message(st.session_state.sock)
     return receive_message(st.session_state.sock) \
         if "openai" not in st.session_state else \
             st.session_state.openai.generate_text(receive_message(st.session_state.sock))
@@ -130,52 +162,25 @@ def round_corner_box(text, color):
         </div>
         """
 
-# Sidebar title
-st.sidebar.title("Dataflow Status")
-
-placeholder = st.sidebar.empty()
-
-def draw_graph_at_sidebar():
-    global placeholder
-    # Sidebar graph layout
-    if "boxes" not in st.session_state:
-        import yaml
-        yaml_file = open("../shopping_agents/shopping_dataflow.yml", "r")
-        yaml_dict = yaml.safe_load(yaml_file)
-        st.session_state["boxes"] = [
-            [item["id"], "#800080"] for item in yaml_dict["nodes"]
-        ]
-
-    with placeholder.container():
-        placeholder.write(json_text)
-        # Render boxes
-        # placeholder.markdown(''.join([
-        #     round_corner_box(text, color)
-        #     for text, color in st.session_state["boxes"]
-        # ]), unsafe_allow_html=True)
-
-def draw_graph_at_main(label: str):
-    global placeholder
-    placeholder.empty()
-    st.sidebar.empty()
-    for index in range(len(st.session_state["boxes"])):
-        text, color = st.session_state["boxes"][index]
-        if text == label or text == label.replace("_", "-"):
-            # Recolor the box to sky blue
-            st.session_state["boxes"][index][1] = "#679EFF"
-        else:
-            st.session_state["boxes"][index][1] = "#800080"
-    draw_graph_at_sidebar()
+# def draw_graph_at_main(label: str, json_text: str):
+#     global placeholder
+#     placeholder.empty()
+#     st.sidebar.empty()
+#     for index in range(len(st.session_state["boxes"])):
+#         text, color = st.session_state["boxes"][index]
+#         if text == label or text == label.replace("_", "-"):
+#             # Recolor the box to sky blue
+#             st.session_state["boxes"][index][1] = "#679EFF"
+#         else:
+#             st.session_state["boxes"][index][1] = "#800080"
+#     draw_graph_at_sidebar()
 
 def main():
-    global json_text
     st.title("Shopping Agent UI")
     server_ip = "127.0.0.1"
     server_port = 12345
 
     check_connection()
-
-    draw_graph_at_sidebar()
 
     if "openai" not in st.session_state:
         st.session_state.openai = OpenAIClient()
@@ -198,9 +203,6 @@ def main():
             display_chat_history()
             handle_chat_str(prompt)
             handle_chat(lambda: response_prompt(prompt), role="bot")
-            label = eval(json_text)["agent_name"]
-            draw_graph_at_main(label=label)
-            # st.sidebar.write(json_text)
     else:
         st.error("Please ensure that the server is running and try again.")
 

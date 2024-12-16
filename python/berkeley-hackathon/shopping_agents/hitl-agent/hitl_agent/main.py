@@ -14,74 +14,84 @@ from mofa.utils.install_pkg.load_task_weaver_result import extract_important_con
 RUNNER_CI = True if os.getenv("CI") == "true" else False
 
 import socket
-
+import threading
+import time
 
 class Click:
 
     def __init__(self):
         self.msg = ""
-        self.start_server()
         self.node_info = {}
-        shopping_dataflow = {''}
+        self.node_info_lock = threading.Lock()
+        self.message_lock = threading.Lock()
+        self.start_server()
+        self.thread = threading.Thread(target=Click.listen_loop, args=(self,))
+        self.thread.start()
+
+    def listen_loop(self):
+        while True:
+            with self.node_info_lock:
+                self.send_message(self.conn, str(self.node_info), signal=True)
+            time.sleep(1)
 
     def echo(self, message):
         self.msg += message + "\n\n"
 
     def input(self, prompt: str, send=True):
-        while True:
-            try:
-                if send:
-                    Click.send_message(self.conn, str(self.node_info))
-                    Click.send_message(self.conn, self.msg)
-                self.msg = ""
-                return Click.receive_message(self.conn)
-            except:
-                self.echo("Connection lost, please try again.")
-                self.conn.close()
-                conn, addr = self.server_socket.accept()
-                print(f"Connected by {addr}")
-                self.conn = conn
-                continue
+        if send:
+            self.send_message(self.conn, self.msg)
+        self.msg = ""
+        recv_msg = self.receive_message(self.conn)
+        return recv_msg
 
-    def send_message(conn, message):
+    def send_message(self, conn, message, signal=False):
         """Send an arbitrary-sized string over a socket connection."""
         message = message.encode('utf-8')  # Encode the string into bytes
         message_length = len(message)
-        conn.sendall(f"{message_length:<10}".encode('utf-8'))  # Send header with fixed length
-        conn.sendall(message)  # Send the actual message
+        with self.message_lock:
+            # print(f"Sending {message_length} bytes, message: {message.decode('utf-8')}, header: " + f"S{message_length:<10}, len: {len(f'S{message_length:<10}'.encode('utf-8'))}")
+            if signal:
+                conn.sendall(f"S{message_length:<10}".encode('utf-8'))  # Send header with fixed length
+            else:
+                conn.sendall(f"N{message_length:<10}".encode('utf-8'))  # Send header with fixed length
+            conn.sendall(message)  # Send the actual message
 
-    def receive_message(conn):
+    def receive_message(self, conn):
         """Receive an arbitrary-sized string over a socket connection."""
-        header = conn.recv(10).decode('utf-8')  # Read the 10-byte header
-        if not header:
-            return None
-        message_length = int(header.strip())  # Get the message length from the header
-        data = b""
-        while len(data) < message_length:
-            chunk = conn.recv(message_length - len(data))
-            if not chunk:
-                break
-            data += chunk
+        with self.message_lock:
+            header = conn.recv(11).decode('utf-8')  # Read the 10-byte header
+            if not header:
+                return None
+            message_length = int(header[1:].strip())  # Get the message length from the header
+            data = b""
+            while len(data) < message_length:
+                chunk = conn.recv(message_length - len(data))
+                if not chunk:
+                    break
+                data += chunk
+        # print(f"Received {message_length} bytes, message: {data.decode('utf-8')}")
         return data.decode('utf-8')  # Decode the bytes into a string
 
     def start_server(self, host='127.0.0.1', port=12345):
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind((host, port))
-        server_socket.listen(5)  # Allow 5 connections to queue
-        print(f"Server running on {host}:{port}...")
-        self.server_socket = server_socket
-        conn, addr = server_socket.accept()
-        print(f"Connected by {addr}")
-        self.conn = conn
+        with self.message_lock:
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.bind((host, port))
+            server_socket.listen(5)  # Allow 5 connections to queue
+            print(f"Server running on {host}:{port}...")
+            self.server_socket = server_socket
+            conn, addr = server_socket.accept()
+            print(f"Connected by {addr}")
+            self.conn = conn
 
     def release_server(self):
-        self.conn.close()
-        self.server_socket.close()
+        with self.message_lock:
+            self.conn.close()
+            self.server_socket.close()
 
 
 click = Click()
 
-import signal
+# import signal
 
 
 def signal_handler(sig, frame):
@@ -94,10 +104,11 @@ def click_log(event,click,node_ids:list=None):
     if event['id'] in node_ids:
         node_results = json.loads(event['value'].to_pylist()[0])
         results = node_results.get('node_results')
-        click.node_info = results
+        with click.node_info_lock:
+            click.node_info = results
 
-signal.signal(signal.SIGINT, signal_handler)
-signal.signal(signal.SIGTERM, signal_handler)
+# signal.signal(signal.SIGINT, signal_handler)
+# signal.signal(signal.SIGTERM, signal_handler)
 def clean_string(input_string:str):
     return input_string.encode('utf-8', 'replace').decode('utf-8')
 def send_task_and_receive_data(node):
