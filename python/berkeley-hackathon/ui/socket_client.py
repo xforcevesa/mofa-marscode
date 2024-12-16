@@ -73,7 +73,7 @@ st.sidebar.title("Dataflow Status")
 
 placeholder = st.sidebar.empty()
 
-def draw_graph_at_sidebar(json_text: str):
+def draw_graph_at_sidebar(json_text: str = "{}"):
     global placeholder
     # Sidebar graph layout
     if "boxes" not in st.session_state:
@@ -84,13 +84,31 @@ def draw_graph_at_sidebar(json_text: str):
             [item["id"], "#800080"] for item in yaml_dict["nodes"]
         ]
 
+    json = eval(json_text)
+    label = json["agent_name"] if "agent_name" in json else None
+    status = json["agent_status"] if "agent_status" in json else None
+
+    if label is not None:
+        for index in range(len(st.session_state["boxes"])):
+            text, _ = st.session_state["boxes"][index]
+            if text == label or text == label.replace("_", "-"):
+                # Recolor the box to sky blue
+                st.session_state["boxes"][index][1] = "#677EFF"
+            else:
+                st.session_state["boxes"][index][1] = "#800080"
+
     with placeholder.container():
-        placeholder.write(json_text)
+        # placeholder.write(json_text)
         # Render boxes
-        # placeholder.markdown(''.join([
-        #     round_corner_box(text, color)
-        #     for text, color in st.session_state["boxes"]
-        # ]), unsafe_allow_html=True)
+        placeholder.markdown(''.join([
+            round_corner_box(
+                text=text + " - " + status \
+                    if status is not None and (text == label or text == label.replace("_", "-")) \
+                        else text + " - " + "Not Running",
+                color=color
+            )
+            for text, color in st.session_state["boxes"]
+        ]), unsafe_allow_html=True)
 
 def receive_message(sock):
     """Receive an arbitrary-sized string over a socket."""
@@ -151,29 +169,16 @@ def round_corner_box(text, color):
     return f"""
         <div style="
             background-color: {color};
-            border-radius: 15px;
-            padding: 10px 15px;
-            margin: 10px 0;
+            border-radius: 10px;
+            padding: 2% 2%;
+            margin: 2% 0;
             color: white;
             text-align: center;
-            font-size: 16px;
+            font-size: 90%;
             font-weight: bold;">
             {text}
         </div>
         """
-
-# def draw_graph_at_main(label: str, json_text: str):
-#     global placeholder
-#     placeholder.empty()
-#     st.sidebar.empty()
-#     for index in range(len(st.session_state["boxes"])):
-#         text, color = st.session_state["boxes"][index]
-#         if text == label or text == label.replace("_", "-"):
-#             # Recolor the box to sky blue
-#             st.session_state["boxes"][index][1] = "#679EFF"
-#         else:
-#             st.session_state["boxes"][index][1] = "#800080"
-#     draw_graph_at_sidebar()
 
 def main():
     st.title("Shopping Agent UI")
@@ -181,6 +186,8 @@ def main():
     server_port = 12345
 
     check_connection()
+
+    draw_graph_at_sidebar()
 
     if "openai" not in st.session_state:
         st.session_state.openai = OpenAIClient()
@@ -208,8 +215,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # try:
     main()
-    # except Exception as e:
-    #     st.error(f"Error: {e.with_traceback(None)}")
-    #     cleanup_socket()
