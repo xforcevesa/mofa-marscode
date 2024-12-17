@@ -176,7 +176,28 @@ def send_task_and_receive_data(node):
                                 break
                             click_log(event=event, click=click)
                             event = node.next(timeout=5000)
-
+                    if shopping_solution_status is False:
+                        click_log(event=event, click=click)
+                        while True:
+                            click_log(event=event, click=click)
+                            if event['id'] == "shopping_solution_status":
+                                click_log(event=event, click=click)
+                                node_results = json.loads(event['value'].to_pylist()[0])
+                                results = node_results.get('node_results')
+                                click.echo(results)
+                                data = click.input(" Please re-enter your suggestions for the shopping plan :  ",)
+                                node.send_output("shopping_solution_user_input", pa.array([clean_string(data)]))
+                                click_log(event=event, click=click)
+                            if event['id'] == "shopping_solution_result":
+                                click_log(event=event, click=click)
+                                node_results = json.loads(event['value'].to_pylist()[0])
+                                results = node_results.get('node_results')
+                                click.echo("This is the user's requirement description.")
+                                click.echo(results)
+                                shopping_requirement_status = True
+                                click_log(event=event, click=click)
+                                break
+                            event = node.next(timeout=5000)
 
                     click_log(event=event, click=click)
                     node_results = json.loads(event['value'].to_pylist()[0])

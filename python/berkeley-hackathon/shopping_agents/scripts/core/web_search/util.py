@@ -1,3 +1,5 @@
+import json
+
 import tiktoken
 from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
@@ -379,3 +381,9 @@ def shopping_html_structure(llm_client,html_content:str,search_text:str)->str:
             all_result.append(result.json())
 
     return ' ||| '.join(all_result)
+
+
+def read_website(file_path:str='webpage.json')->str:
+    with open(file_path,'r') as f:
+        data = json.load(f)
+    return data
