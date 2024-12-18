@@ -31,7 +31,8 @@ class Click:
     def listen_loop(self):
         while True:
             with self.node_info_lock:
-                self.send_message(self.conn, str(self.node_info), signal=True)
+                node_info_str = str(self.node_info)
+            self.send_message(self.conn, node_info_str, signal=True)
             time.sleep(0.1)
 
     def echo(self, message):
@@ -39,12 +40,18 @@ class Click:
 
     def input(self, prompt: str, send=True):
         if send:
+            # print(f"Sending: {self.msg}")
+            self.send_message(self.conn, self.msg)
+            # print(f"Sent: {self.msg}")
+        else:
             self.send_message(self.conn, self.msg)
         self.msg = ""
+        # print("Receiving input...")
         recv_msg = self.receive_message(self.conn)
+        # print(f"Received: {recv_msg}")
         return recv_msg
 
-    def send_message(self, conn, message, signal=False):
+    def send_message(self, conn, message, signal=False, end=False):
         """Send an arbitrary-sized string over a socket connection."""
         message = message.encode('utf-8')  # Encode the string into bytes
         message_length = len(message)
@@ -52,8 +59,10 @@ class Click:
             # print(f"Sending {message_length} bytes, message: {message.decode('utf-8')}, header: " + f"S{message_length:<10}, len: {len(f'S{message_length:<10}'.encode('utf-8'))}")
             if signal:
                 conn.sendall(f"S{message_length:<10}".encode('utf-8'))  # Send header with fixed length
-            else:
+            elif not end:
                 conn.sendall(f"N{message_length:<10}".encode('utf-8'))  # Send header with fixed length
+            else:
+                conn.sendall(f"E{message_length:<10}".encode('utf-8'))  # Send header with fixed length
             conn.sendall(message)  # Send the actual message
 
     def receive_message(self, conn):

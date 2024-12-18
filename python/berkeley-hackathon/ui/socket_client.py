@@ -25,7 +25,7 @@ class OpenAIClient:
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant. Help me with my text enhancement on shopping decision making. The output text should be in a markdown format and should have tables if necessary."},
-                {"role": "user", "content": str(prompt) + "\r\n\r\n According to the text above, enhance the text further. Output should be in a markdown format and should not have any other content and should not have markdown in the ``` code blocks. If we need user input, we can ask for it in the chat interface. The original content should not be changed. Only optimize the expression."}
+                {"role": "user", "content": str(prompt) + "\r\n\r\n According to the text or json above, enhance the text further. Output should be in a markdown format and should not have any other content and should not have markdown in the ``` code blocks. If we need user input, we can ask for it in the chat interface. The original content should not be changed. Only optimize the expression."}
             ],
             max_tokens=4096,
             temperature=0.9,
@@ -118,6 +118,9 @@ def receive_message(sock):
             return message
         elif header == "S":
             draw_graph_at_sidebar(json_text=message)
+        elif header == "E":
+            if len(message):
+                return message + "\n the current session has been terminated. You can ask for a new session to help you with your shopping decision making."
 
 def response_prompt(prompt: str):
     send_message(st.session_state.sock, prompt)
