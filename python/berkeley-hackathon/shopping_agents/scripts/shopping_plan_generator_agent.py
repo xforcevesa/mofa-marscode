@@ -1,7 +1,3 @@
-
-
-
-
 import json
 import os
 import time
@@ -19,7 +15,8 @@ class Operator:
     def __init__(self):
         self.user_requirement = None
         self.user_suggestions_messages = []
-        self.max_loop_num = 4
+        self.max_loop_num = 1
+        self.local_loop_num = 0
         yaml_file_path = get_relative_path(current_file=__file__, sibling_directory_name='configs',
                                            target_file_name='shopping_agent.yml')
         shopping_data = read_yaml(file_path=yaml_file_path)
@@ -41,7 +38,7 @@ class Operator:
                 # result_data = result.json()
                 # print('result_data:', self.user_requirement)
                 send_output("shopping_planning_status", pa.array([create_agent_output(step_name='shopping_planning_status', output_data='data',dataflow_status=os.getenv('IS_DATAFLOW_END',False))]),dora_event['metadata'])
-                self.max_loop_num += 1
+                self.local_loop_num += 1
             elif dora_event['id'] == 'shopping_plan_user_input':
                 t1 = time.time()
                 send_output("shopping_plan_agent_status", pa.array([create_agent_output(step_name='shopping_plan_agent_status',
@@ -62,8 +59,8 @@ class Operator:
                                                               dataflow_status=os.getenv(
                                                                   'IS_DATAFLOW_END', False))]),
                                 dora_event['metadata'])
-                    self.max_loop_num+=1
-                elif self.max_loop_num >self.max_loop_num or result.Continue_Analysis is True:
+                    self.local_loop_num+=1
+                elif self.local_loop_num >self.max_loop_num or result.Continue_Analysis is True:
 
                     shopping_web_search = extract_web_search_text_by_product_type(shopping_plan=result)
                     print('shopping_web_search: ',shopping_web_search)
@@ -101,5 +98,5 @@ class Operator:
                                                                                      dataflow_status=os.getenv(
                                                                                          'IS_DATAFLOW_END', False))]),
                                 dora_event['metadata'])
-                    self.max_loop_num = 0
+                    self.local_loop_num = 0
         return DoraStatus.CONTINUE

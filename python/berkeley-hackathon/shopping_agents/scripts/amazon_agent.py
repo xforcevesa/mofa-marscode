@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 class Operator:
     def __init__(self):
         self.task = None
-        self.timeout = 240
+        self.timeout = 600
 
     def on_event(
             self,

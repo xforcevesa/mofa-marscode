@@ -1,6 +1,6 @@
-amazon_agent:
-  inputs: amazon_search
-  outputs: amazon_shopping_result
+#amazon_agent:
+#  inputs: amazon_search
+#  outputs: amazon_shopping_result
 
 bronners_agent:
   inputs: bronners_search

@@ -13,6 +13,8 @@ class Operator:
         self.api_key = os.getenv("API_KEY")
         self.user_shopping_requirement = RequirementClarificationAgent(api_key=self.api_key)
         self.task = None
+        self.max_loop_num = 3
+        self.local_loop_num = 0
     def on_event(
             self,
             dora_event,
@@ -33,7 +35,8 @@ class Operator:
                 llm_output = self.user_shopping_requirement.send_request(messages=message)
                 print('-------: ',llm_output)
                 json_data = self.user_shopping_requirement.extract_json(llm_output)
-                if json_data:
+
+                if json_data or self.local_loop_num>self.max_loop_num:
                     self.user_shopping_requirement.final_json = json_data
                     send_output("user_shopping_requirement_result",
                                 pa.array([create_agent_output(step_name='user_shopping_requirement_result',
@@ -50,8 +53,10 @@ class Operator:
                                                                                      dataflow_status=os.getenv(
                                                                                          'IS_DATAFLOW_END', False))]),
                                 dora_event['metadata'])
+                    self.local_loop_num = 0
 
                 else:
+                    self.local_loop_num += 1
                     send_output("user_shopping_requirement_status",
                                 pa.array([create_agent_output(step_name='user_shopping_requirement_status',
                                                               output_data=llm_output,

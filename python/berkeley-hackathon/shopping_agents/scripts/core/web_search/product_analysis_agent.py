@@ -41,7 +41,7 @@ Parse the provided HTML content and extract all information related to products 
 """
 
 class ProductAnalysisAgent:
-    def __init__(self, api_key: str, base_url: str = None):
+    def __init__(self, api_key: str,):
         """
         Initialize the ProductAnalysisAgent.
 
@@ -50,8 +50,7 @@ class ProductAnalysisAgent:
             base_url (str): Base URL for the API.
         """
         self.api_key = api_key
-        self.base_url = base_url
-        self.client = OpenAI(api_key=api_key, base_url=base_url)
+        self.client = OpenAI(api_key=api_key, )
 
     def estimate_card_tokens(self, card_html: str, model: str = "gpt-4") -> int:
         """

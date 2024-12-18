@@ -11,7 +11,7 @@ from core.web_search.util import shopping_html_structure
 class Operator:
     def __init__(self):
         self.task = None
-        self.timeout = 240
+        self.timeout = 600
 
     def on_event(
             self,
@@ -54,3 +54,11 @@ class Operator:
                             dora_event['metadata'])
 
         return DoraStatus.CONTINUE
+
+if __name__=="__main__":
+    task = {'Lipstick': ['Bright color moisturizing long-lasting cruelty-free lipstick under $25']}
+    web_search_tasks = [item for values_list in task.values() for item in values_list]
+    for web_search_text in web_search_tasks:
+
+        web_result = notonthehighstreet_scraper(search_keyword=web_search_text,api_key='sk-',)
+        print(web_result.json())

@@ -11,7 +11,7 @@ from core.web_search.util import shopping_html_structure
 class Operator:
     def __init__(self):
         self.task = None
-        self.timeout = 240
+        self.timeout = 600
 
     def on_event(
             self,
