@@ -107,4 +107,4 @@ We welcome contributions in any form, including but not limited to:
 
 ## License
 
-MIT License. See [LICENSE]() for more details.
+MIT License. See [LICENSE](https://github.com/chengzi0103/mofa_berkeley_hackathon/blob/main/LICENSE) for more details.
