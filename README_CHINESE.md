@@ -1,21 +1,21 @@
-# Shopping-Agent
+# MOFA-Shopping
 
-**Shopping-Agent** 是一个智能购物助手应用，旨在帮助用户从不同的电商平台上挑选商品并给出定制化的购物建议。通过利用先进的开源框架 **MOFA** 和 **dora-rs** 的 **dataflow** 技术，我们构建了一个高效、模块化且灵活的系统，可以智能地获取和分析用户需求，并为用户提供最佳的购物选择。
+**MOFA-Shopping** 是一个智能购物助手应用，旨在帮助用户从不同的电商平台上挑选商品并给出定制化的购物建议。通过利用先进的开源框架 **MOFA** 和 **dora-rs** 的 **dataflow** 技术，我们构建了一个高效、模块化且灵活的系统，可以智能地获取和分析用户需求，并为用户提供最佳的购物选择。
 
 ## 项目目标
 
-我们的目标是解决当前电商平台购物时信息过载和选择困难的问题。Shopping-Agent 通过智能的多Agent架构，连接多个数据源并自动化处理从网站获取商品信息的流程，减少用户的决策疲劳并提供个性化的购物建议。用户只需简单表达需求，Shopping-Agent 会通过子Agent从不同平台获取商品数据，进行分析，并返回最合适的推荐。
+我们的目标是解决当前电商平台购物时信息过载和选择困难的问题。 MOFA-Shopping通过智能的多Agent架构，连接多个数据源并自动化处理从网站获取商品信息的流程，减少用户的决策疲劳并提供个性化的购物建议。用户只需简单表达需求，MOFA-Shopping 会通过子Agent从不同平台获取商品数据，进行分析，并返回最合适的推荐。
 
 ## 技术架构
 
 ### 核心组件
 
 1. **MOFA**
-   MOFA 是我们的基础框架，支持构建灵活的多Agent系统。我们在此框架上构建了整个购物推荐系统，确保各个子模块（如数据获取、分析等）可以高效地协同工作。
+   **MOFA** 是我们的基础框架，支持构建灵活的多Agent系统。我们在此框架上构建了整个购物推荐系统，确保各个子模块（如数据获取、分析等）可以高效地协同工作。
 2. **dora-rs Dataflow**
    为了在各个子模块之间实现高效、可扩展的数据流交互，我们使用了 **dora-rs** 的 **dataflow** 。通过数据流管理，我们能够确保从不同平台获取的数据能够顺畅地传递给主Agent进行分析，并最终给出建议。
-3. **Main Agent & Sub Agents**（UI）
-   主Agent负责接收用户的需求，并通过调用多个子Agent来获取商品数据。每个子Agent负责从一个或多个特定网站抓取商品信息，例如价格、品牌、评价等。主Agent接收到所有子Agent的返回信息后，会根据用户的需求对数据进行分析，给出最终的购物建议。
+3. **Streamlit UI: User-Friendly Interface for Shopping Assistance**
+   通过 **Streamlit**，用户可以在浏览器中与购物助手应用进行实时互动。Streamlit 提供了一个简洁而直观的前端界面，用户只需输入需求，系统便会通过与后端的连接，实时获取来自多个电商平台的商品信息，并将推荐结果动态展示给用户。Streamlit 的前后端分离设计使得用户体验更加流畅，所有的数据抓取与分析处理都在后台进行，而用户则通过交互式的界面轻松浏览推荐商品。通过输入框、按钮、筛选器等组件，用户能够快速调整需求并即时看到更新的推荐结果。
 
 ### 数据流动
 
@@ -36,7 +36,7 @@
 
 #### 安装 MOFA
 
-**克隆 shopping-agent 项目**
+**克隆 MOFA-Shopping 项目**
 
 克隆此项目并切换到指定分支:
 
@@ -81,43 +81,21 @@ cargo install dora-cli --locked
 
 dora-rs 基于 Rust 开发，请确保您的系统上已经安装了 Rust 环境。
 
-### 配置
-
-在使用Shopping-Agent之前，首先需要对configs目录下面的yml文件进行配置。
-
-```
-cp configs/example.yml configs/local.yml
-```
-
-大语言模型推理 API配置示例：
-
-使用OpenaiAPI：
-
-```
-MODEL:
-  MODEL_API_KEY:  
-  MODEL_NAME: gpt-4o-mini
-  MODEL_MAX_TOKENS: 2048
-```
-
-当然你也可以配置成为Ollama模型，或Moxin提供的本地开源大模型
-
-使用Ollama示例:
-
-```
-MODEL:
-  MODEL_API_KEY: ollama
-  MODEL_NAME: qwen:14b
-  MODEL_MAX_TOKENS: 2048
-  MODEL_API_URL: http://192.168.0.1:11434
-```
-
 ### 运行
 
-1. 启动dataflow：
-2. 启动UI：
 
-用户可以通过命令行界面或API向主Agent发送需求，系统会自动处理并返回购物建议。
+1. 首先进入到 `python/berkeley-hackathon/shopping_agents` 目录下
+2. 在当前目录下创建一个文件 名字叫做`.env.secret`,结构如下
+
+~~~
+API_KEY=
+~~~
+
+3. 在当前目录下运行命令 `dora up && dora build shopping_dataflow.yml && dora start shopping_dataflow.yml --attach`
+4. 在另外一个命令端下面运行 `hitl-agent`
+5. 开启另外一个命令端,在命令行中使用`cd /mofa_berkeley_hackathon/python/berkeley-hackathon/ui && streamlit run socket_client.py` 可以看到你的页面打开了。 保证你的端口12345没有被占用，如果被占用了，使用`lsof -i :12345`来查看被占用的进程号，使用  kill -9 删除它
+
+访问`http://localhost:8501`，开始使用MOFAagent
 
 ## 未来展望
 
