@@ -1,0 +1,4 @@
+out/**
+local_cache/**
+data/**
+.env.secret

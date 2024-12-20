@@ -1,0 +1,15 @@
+INFO:     Started server process [36969]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:62817 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62817 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63384 - "GET /v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63399 - "GET /v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64157 - "GET /v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64157 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64266 - "GET /v1/v1/models HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64269 - "GET /v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64781 - "GET /v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55663 - "GET /v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55683 - "POST /v1/chat/completions HTTP/1.1" 200 OK

@@ -1,0 +1,21 @@
+AGENT:
+  ROLE: Knowledgeable Assistant
+  BACKSTORY: 会写代码的AI
+  TASK: null
+
+MODEL:
+  MODEL_API_KEY: sk-sfaigcvctzxozqqmfjvrmetdhkbcakdltqxsewjpvqupmmhd
+  MODEL_NAME: deepseek-ai/DeepSeek-V2-Chat
+  MODEL_MAX_TOKENS: 2048
+  MODEL_API_URL: https://api.siliconflow.cn/v1/chat/completions
+
+ENV:
+  PROXY_URL: null
+  AGENT_TYPE: reasoner
+
+LOG:
+  LOG_PATH: ./data/output/log/log.md
+  LOG_TYPE: markdown
+  LOG_STEP_NAME: reasoner_result
+  CHECK_LOG_PROMPT: true
+

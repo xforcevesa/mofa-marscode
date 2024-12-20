@@ -1,0 +1,254 @@
+nodes:
+- id: terminal-input
+  build: pip install -e ../../node-hub/terminal-input
+  path: dynamic
+  outputs:
+  - data
+  inputs:
+    agent_response: final-node/final_output
+- id: agent_0_1
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_1_1
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_2_1
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_3_1
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_4_1
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_0_2
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_1_2
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_2_2
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_3_2
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_4_2
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_0_3
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_1_3
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_2_3
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_3_3
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_4_3
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_0_4
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_1_4
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_2_4
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_3_4
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_4_4
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_0_5
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_1_5
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_2_5
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_3_5
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_4_5
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_0_6
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_1_6
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_2_6
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_3_6
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: agent_4_6
+  operator:
+    python: scripts/agent.py
+    inputs:
+      task: terminal-input/data
+    outputs:
+    - agent_response
+- id: final-node
+  operator:
+    python: scripts/final_node.py
+    inputs:
+      agent_0_response_1: agent_0_1/agent_response
+      agent_0_response_2: agent_0_2/agent_response
+      agent_0_response_3: agent_0_3/agent_response
+      agent_0_response_4: agent_0_4/agent_response
+      agent_0_response_5: agent_0_5/agent_response
+      agent_0_response_6: agent_0_6/agent_response
+      agent_1_response_1: agent_1_1/agent_response
+      agent_1_response_2: agent_1_2/agent_response
+      agent_1_response_3: agent_1_3/agent_response
+      agent_1_response_4: agent_1_4/agent_response
+      agent_1_response_5: agent_1_5/agent_response
+      agent_1_response_6: agent_1_6/agent_response
+      agent_2_response_1: agent_2_1/agent_response
+      agent_2_response_2: agent_2_2/agent_response
+      agent_2_response_3: agent_2_3/agent_response
+      agent_2_response_4: agent_2_4/agent_response
+      agent_2_response_5: agent_2_5/agent_response
+      agent_2_response_6: agent_2_6/agent_response
+      agent_3_response_1: agent_3_1/agent_response
+      agent_3_response_2: agent_3_2/agent_response
+      agent_3_response_3: agent_3_3/agent_response
+      agent_3_response_4: agent_3_4/agent_response
+      agent_3_response_5: agent_3_5/agent_response
+      agent_3_response_6: agent_3_6/agent_response
+      agent_4_response_1: agent_4_1/agent_response
+      agent_4_response_2: agent_4_2/agent_response
+      agent_4_response_3: agent_4_3/agent_response
+      agent_4_response_4: agent_4_4/agent_response
+      agent_4_response_5: agent_4_5/agent_response
+      agent_4_response_6: agent_4_6/agent_response
+    outputs:
+    - final_output

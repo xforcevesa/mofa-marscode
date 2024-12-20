@@ -1,0 +1,6 @@
+out/**
+local_cache/**
+data/**
+.env.secret
+.demo.py
+chromedriver
