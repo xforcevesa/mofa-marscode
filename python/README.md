@@ -1,85 +1,102 @@
 # MoFA for Dora-RS
 
-在这个分支里，我们介绍建立在Dora-RS上的MoFA框架。
+In this branch, we introduce the MoFA framework built on Dora-RS.
 
-## Getting started
+## Getting Started
 
-### 1. 安装
+### 1. Installation
 
-1. 克隆此项目切换到指定分支:
+1. **Clone the Repository and Switch to the Specified Branch:**
 
-```sh
-git clone <repository-url> && git checkout <branch-name> 
-```
+   ```sh
+   git clone <repository-url>
+   ```
 
-**示例**:
+   **Example:**
 
-```sh
-git clone git@github.com:moxin-org/mofa.git && cd mofa
-```
+   ```sh
+   git clone git@github.com:moxin-org/mofa.git && cd mofa
+   ```
 
-2. 使用Python 3.10或以上环境：
+2. **Ensure Python 3.10 or Higher is Installed:**
 
-- 如果出现环境版本不匹配，请使用conda重新安装此环境。例如：
+   - If you encounter a version mismatch, use `conda` to create a new environment. For example:
 
-```sh
-conda create -n py310 python=3.10.12 -y
-```
+     ```sh
+     conda create -n py310 python=3.10.12 -y
+     ```
 
-3. 项目环境部署
+3. **Set Up the Project Environment:**
 
-- 安装环境的依赖：
+   - Install the required dependencies:
 
-```sh
-cd python && pip3 install -r requirements.txt && pip3 install -e .
+     ```sh
+     cd python
+     pip3 install -r requirements.txt
+     pip3 install -e .
+     ```
 
-```
+   - After installation, you can view the CLI help information using:
 
-安装完毕之后，可以使用`mofa --help`命令查看Cli帮助信息
+     ```sh
+     mofa --help
+     ```
 
-4. Rust和Dora-RS安装
+4. **Install Rust and Dora-RS:**
 
-由于底层的Dora-RS计算框架基于Rust语言开发，请你访问下面的页面，根据你的操作系统安装Rust环境：
+   - Since the underlying Dora-RS computation framework is developed in Rust, install the Rust environment by visiting:
 
-```sh
-https://www.rust-lang.org/tools/install
-```
-然后安装 `cargo install dora-cli --locked`
+     ```sh
+     https://www.rust-lang.org/tools/install
+     ```
 
-### 2. 配置
+   - After installing Rust, install the Dora CLI tool:
 
-在 `examples` 这个目录下, 我们提供一些可用的智能体案例。在使用时，首先需要对智能体的configs目录下面的yml文件进行配置。 
-如果`node`如果使用的是pip的方式进行安装的. 那么请你到`agent-hub`中找到对应的node的名称,并且修改里面的`yml`文件
+     ```sh
+     cargo install dora-cli --locked
+     ```
 
-大语言模型推理 Api配置示例：
-使用**Openai**API：
+5. **Run Berkeley-Hackathon:**
 
-~~~
-MODEL:
-  MODEL_API_KEY:  
-  MODEL_NAME: gpt-4o-mini
-  MODEL_MAX_TOKENS: 2048
-~~~
+   - For detailed instructions, refer to [berkeley-hackathon.md](berkeley-hackathon/shopping_agents/README.md).
 
-当然你也可以配置成为Ollama模型，或Moxin提供的本地开源大模型：
+---
 
-使用**Ollama**示例:
+## Additional Notes
 
-~~~
-MODEL:
-  MODEL_API_KEY: ollama
-  MODEL_NAME: qwen:14b
-  MODEL_MAX_TOKENS: 2048
-  MODEL_API_URL: http://192.168.0.1:11434
-~~~
+- **Environment Activation:**
+  After creating the Conda environment, activate it using:
 
+  ```sh
+  conda activate py310
+  ```
 
+- **Verifying Installations:**
+  - **Python Version:**
 
-### 3. 启动
+    ```sh
+    python --version
+    ```
 
-在命令端启用MOFA智能体
+    Ensure it returns Python 3.10.x or higher.
 
-### 4. 详细文档
+  - **Rust Installation:**
 
-更多的详细文档在[documents](documents/README.md)子目录下。
+    ```sh
+    rustc --version
+    ```
 
+    Ensure Rust is installed correctly.
+
+  - **Dora CLI:**
+
+    ```sh
+    dora --version
+    ```
+
+    Verify that the Dora CLI is installed and accessible.
+
+- **Troubleshooting:**
+  - If you encounter issues during installation, ensure that all prerequisites are met and that your system meets the necessary requirements.
+  - For Rust-related issues, refer to the [Rust installation guide](https://www.rust-lang.org/tools/install) for detailed troubleshooting steps.
+  - For Python dependency issues, consider using virtual environments or Docker containers to isolate the project dependencies.

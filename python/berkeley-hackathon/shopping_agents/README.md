@@ -1,129 +1,152 @@
+# **Intelligent Shopping Agent System Development Plan**
 
-# **智能购物代理系统开发方案**
+## **1. Project Overview**
 
-## **一、项目概述**
+This project aims to build an intelligent shopping system that leverages multiple agents working collaboratively. The system consists of a Human-In-The-Loop Agent (HITL-Agent) and several functional agents, which automatically decompose and execute tasks to meet users' personalized shopping needs. When a user inputs shopping requirements (such as budget, preferences, and intended use), the system automatically breaks them down into multiple subtasks (like product searches on specific platforms), invokes the corresponding e-commerce agents to perform queries, and integrates the results to form a final shopping plan.
 
-本项目旨在搭建一套通过多代理（Agents）协同工作的智能购物系统。该系统由一个人机交互代理（HITL-Agent）和多个功能代理组成，通过自动化的任务分解与执行来满足用户的个性化购物需求。用户输入购物需求（如预算、喜好、用途）后，系统将自动分解为多个子任务（如特定平台的产品搜索）、调用相应的电商代理执行查询，并整合结果形成最终的购物方案。
-
-本系统的核心特色在于其模块化与可扩展性：通过独立的代理（如 Amazon、Bronners、Worldmarket、Minted、Balsamhill、Christmaslightsetc、Notonthehighstreet 等）对接各电商平台，实现数据来源的平行扩展。购物规划和需求解析分离，支持动态调整用户需求和方案，让系统可以在用户反馈下快速迭代并优化最终推荐。
-
----
-
-## **二、系统目标**
-
-- **自动化需求解析**：从用户文本输入中提取购物预算、产品偏好、用途场景等关键信息。
-- **任务分解与规划**：根据用户需求自动生成查询任务清单（如对多个电商平台的搜索指令）。
-- **多源信息聚合**：从不同电商代理获取产品信息（价格、规格、库存等），进行跨平台比较与筛选。
-- **方案生成与反馈**：为用户提供候选购物方案，并支持用户对方案的反馈与再次调整。
+The core features of this system are its modularity and scalability. By integrating independent agents (such as Amazon, Bronners, Worldmarket, Minted, Balsamhill, Christmaslightsetc, Notonthehighstreet, etc.) with various e-commerce platforms, the system achieves parallel data source expansion. Separating shopping planning from requirement parsing allows dynamic adjustments to user needs and plans, enabling the system to rapidly iterate and optimize final recommendations based on user feedback.
 
 ---
 
-## **三、系统架构与数据流**
+## **2. System Objectives**
 
-### **1. 关键节点（Agents）简述**
-
-1. **HITL-Agent（hitl-agent）**  
-   - **角色**：用户与系统交互的入口。  
-   - **功能**：  
-     - 接收用户初始需求 (`user_input`)：例如“我要在预算8000元内买一台用于游戏的笔记本电脑”。  
-     - 接收用户对方案的反馈 (`shopping_solution_user_input`、`shopping_plan_user_input`)，如“更喜欢NVIDIA显卡”或“预算提高到8500元”等。  
-   - **输出**：  
-     - 将用户输入发送给下游的用户需求解析代理和购物规划代理。
-   - **输入**：  
-     - 从下游代理处获取需求解析状态、规划状态、最终方案和各代理的执行状态，便于与用户交互和展示方案。
-
-2. **用户购物需求代理（user-shopping-requirement-agent）**  
-   - **输入**：`user_input`（来自hitl-agent）  
-   - **输出**：  
-     - `user_shopping_requirement_status`：需求分析状态（如成功解析/需要补充信息）  
-     - `user_shopping_requirement_result`：解析后的用户需求要点（预算、喜好品牌、用途场景）  
-     - `user_shopping_requirement_agent_status`：该代理自身状态信息（健康度、执行时间、错误信息等）
-
-   **作用**：将用户模糊、自然语言需求解析为结构化数据，为后续规划做准备。
-
-3. **购物规划代理（shopping-plan-agent）**  
-   - **输入**：  
-     - `shopping_plan_user_input`（来自hitl-agent，用于方案规划的额外输入，如用户对方案的特定要求）  
-     - `user_shopping_requirement_result`（来自需求代理的结构化需求信息）
-   - **输出**：  
-     - `shopping_planning_status` / `shopping_planning_result`：规划状态与结果（如已生成查询任务列表）  
-     - `amazon_search`、`bronners_search`、`worldmarket_search`、`minted_search`、`balsamhill_search`、`christmaslightsetc_search`、`notonthehighstreet_search`：针对不同电商代理的搜索指令  
-     - `shopping_planning_output_agents`：规划结果中涉及的目标代理列表，便于后续整合  
-     - `shopping_plan_agent_status`：状态信息（如规划完成时间、规划质量指标）
-
-   **作用**：根据用户需求，将任务分解为多个电商搜索指令，为各平台代理提供明确的查询参数（例如搜索价格区间、品牌、产品类型）。
-
-4. **各电商代理**（如 `amazon-agent`、`bronners-agent`、`worldmarket-agent`、`minted-agent`、`balsamhill-agent`、`christmaslightsetc-agent`、`notonthehighstreet-agent`）  
-   - **输入**：对应的 ..._search 指令（如 `amazon_search`）  
-   - **输出**：  
-     - 对应的 ..._shopping_result（如 `amazon_shopping_result`）：获取到的电商平台产品列表、价格信息和其他数据  
-     - 对应的 ..._agent_status：执行状态（成功、失败、请求耗时等）
-
-   **作用**：执行特定平台的产品查询与数据获取，为方案生成提供候选商品数据。
-
-5. **购物解决方案代理（shopping-solution-agent）**  
-   - **输入**：  
-     - `shopping_planning_result`：来自规划代理的结果，用于参照用户需求  
-     - `shopping_solution_user_input`：用户针对最终方案的反馈  
-     - `shopping_planning_output_agents`：规划阶段所涉及的电商代理列表  
-     - 各电商代理的 ..._shopping_result：来自不同平台的产品数据
-   - **输出**：  
-     - `shopping_solution_status` / `shopping_solution_result`：最终方案的状态与结果（如已生成3个备选方案）  
-     - `shopping_solution_agent_status`：该代理自身状态信息
-
-   **作用**：根据用户需求和各平台返回的数据，对候选产品进行筛选、组合与排序，生成最终购物方案。如多个方案超出预算，则提供替换建议；若用户不满意，可依其反馈重新计算方案。
+- **Automated Requirement Parsing:** Extract key information such as shopping budget, product preferences, and usage scenarios from user text input.
+- **Task Decomposition and Planning:** Automatically generate a list of query tasks (e.g., search instructions for multiple e-commerce platforms) based on user requirements.
+- **Multi-source Information Aggregation:** Obtain product information (price, specifications, stock, etc.) from different e-commerce agents, enabling cross-platform comparison and filtering.
+- **Plan Generation and Feedback:** Provide users with candidate shopping plans and support user feedback and adjustments to refine the plans.
 
 ---
 
-### **2. 数据流示例**
+## **3. System Architecture and Data Flow**
 
-1. 用户在 HITL-Agent 输入需求 → HITL-Agent 将输入转发给 user-shopping-requirement-agent 解析 → user-shopping-requirement-agent 输出结构化结果与状态 → shopping-plan-agent 使用需求结果与用户附加输入生成搜索指令 → 各电商代理根据搜索指令返回产品数据 → shopping-solution-agent 整合电商数据并生成最终方案 → HITL-Agent 接收方案和状态后向用户展示。
+### **1. Overview of Key Agents**
+
+1. **HITL-Agent (`hitl-agent`)**
+   - **Role:** Entry point for user and system interactions.
+   - **Functions:**
+     - Receives initial user requirements (`user_input`), such as "I want to buy a gaming laptop within a budget of 8000 yuan."
+     - Receives user feedback on plans (`shopping_solution_user_input`, `shopping_plan_user_input`), such as "Prefer NVIDIA graphics cards" or "Increase budget to 8500 yuan."
+   - **Outputs:**
+     - Forwards user inputs to downstream agents for requirement parsing and shopping planning.
+   - **Inputs:**
+     - Receives status updates, planning statuses, final plans, and execution statuses from downstream agents to facilitate user interaction and plan presentation.
+
+2. **User Shopping Requirement Agent (`user-shopping-requirement-agent`)**
+   - **Inputs:** `user_input` (from HITL-Agent)
+   - **Outputs:**
+     - `user_shopping_requirement_status`: Status of requirement analysis (e.g., successfully parsed/needs additional information)
+     - `user_shopping_requirement_result`: Parsed key points of user requirements (budget, preferred brands, usage scenarios)
+     - `user_shopping_requirement_agent_status`: Status information of the agent itself (health, execution time, error messages, etc.)
+   
+   **Function:** Parses users' vague, natural language requirements into structured data, preparing for subsequent planning.
+
+3. **Shopping Plan Agent (`shopping-plan-agent`)**
+   - **Inputs:**
+     - `shopping_plan_user_input` (from HITL-Agent, additional inputs for plan planning, such as specific user requirements for the plan)
+     - `user_shopping_requirement_result` (from Requirement Agent, structured requirement information)
+   - **Outputs:**
+     - `shopping_planning_status` / `shopping_planning_result`: Planning status and results (e.g., generated query task list)
+     - `amazon_search`, `bronners_search`, `worldmarket_search`, `minted_search`, `balsamhill_search`, `christmaslightsetc_search`, `notonthehighstreet_search`: Search instructions for different e-commerce agents
+     - `shopping_planning_output_agents`: List of target agents involved in the planning results for subsequent integration
+     - `shopping_plan_agent_status`: Status information (e.g., planning completion time, planning quality metrics)
+   
+   **Function:** Based on user requirements, decomposes tasks into multiple e-commerce search instructions, providing each agent with clear query parameters (such as price range, brand, product type).
+
+4. **E-commerce Agents** (e.g., `amazon-agent`, `bronners-agent`, `worldmarket-agent`, `minted-agent`, `balsamhill-agent`, `christmaslightsetc-agent`, `notonthehighstreet-agent`)
+   - **Inputs:** Corresponding `..._search` instructions (e.g., `amazon_search`)
+   - **Outputs:**
+     - Corresponding `..._shopping_result` (e.g., `amazon_shopping_result`): Retrieved product lists, pricing information, and other data from the e-commerce platform
+     - Corresponding `..._agent_status`: Execution status (success, failure, request time, etc.)
+   
+   **Function:** Executes product queries and data retrieval specific to their platforms, providing candidate product data for plan generation.
+
+5. **Shopping Solution Agent (`shopping-solution-agent`)**
+   - **Inputs:**
+     - `shopping_planning_result`: Results from the Planning Agent, referenced against user requirements
+     - `shopping_solution_user_input`: User feedback on the final plan
+     - `shopping_planning_output_agents`: List of e-commerce agents involved during the planning phase
+     - `..._shopping_result` from each e-commerce agent: Product data from different platforms
+   - **Outputs:**
+     - `shopping_solution_status` / `shopping_solution_result`: Status and results of the final plan (e.g., 3 alternative plans generated)
+     - `shopping_solution_agent_status`: Status information of the agent itself
+   
+   **Function:** Based on user requirements and data returned from various platforms, filters, combines, and ranks candidate products to generate the final shopping plan. If multiple plans exceed the budget, it provides replacement suggestions. If the user is unsatisfied, it recalculates the plan based on feedback.
 
 ---
 
-## **四、工作流程示例**
+### **2. Data Flow Example**
 
-**情境**：用户想购买一款适合家庭影院环境的投影仪，预算5000元。
-
-1. **用户输入**：  
-   在 HITL-Agent 中输入：“我想买一台预算5000元的投影仪，用来在家看电影。”
-
-2. **需求解析**：  
-   user-shopping-requirement-agent 从输入中提取“预算：5000元、产品类型：投影仪、使用场景：家庭影院”。
-
-3. **任务规划**：  
-   shopping-plan-agent 接收需求解析结果，根据预设的电商平台，生成 `amazon_search`、`worldmarket_search` 等指令（如搜索关键词“home theater projector”、价格范围0-5000元）。
-
-4. **平台查询**：  
-   amazon-agent、worldmarket-agent 等收到各自的搜索指令并查询数据源，返回相应的投影仪产品数据（价格、品牌、分辨率、用户评价）。
-
-5. **方案生成**：  
-   shopping-solution-agent 收集各平台结果，对比价格、性能和用户评价，生成2-3个备选方案供用户选择，并返回给 HITL-Agent。
-
-6. **用户反馈**：  
-   若用户对方案不满意，可以在 HITL-Agent 输入反馈（如“我希望分辨率更高一点，预算增加到6000元”），系统将再次进行规划与查询，直至用户满意。
+1. User inputs requirements into HITL-Agent → HITL-Agent forwards input to `user-shopping-requirement-agent` for parsing → `user-shopping-requirement-agent` outputs structured results and status → `shopping-plan-agent` uses the requirement results and additional user inputs to generate search instructions → E-commerce agents perform searches based on instructions and return product data → `shopping-solution-agent` integrates e-commerce data and generates the final plan → HITL-Agent receives the plan and status to display to the user.
 
 ---
 
+## **4. Workflow Example**
 
+**Scenario:** A user wants to purchase a projector suitable for a home theater environment with a budget of 5000 yuan.
 
-## **五、总结**
+1. **User Input:**
+   - In HITL-Agent, the user inputs: "I want to buy a 5000 yuan budget projector for watching movies at home."
 
-该智能购物代理系统在模块化和可扩展性方面具备显著优势：  
-- 用户输入 → 需求解析 → 方案规划 → 多平台查询 → 方案整合 → 用户反馈的流程清晰且易于扩展。  
-- 引入多电商代理使数据来源更加多元，提高推荐可信度和多样性。  
-- 系统可根据用户反馈快速迭代推荐方案，提高用户满意度。  
-- 通过状态输出与监控机制，可持续优化系统性能与稳定性。
+2. **Requirement Parsing:**
+   - `user-shopping-requirement-agent` extracts: "Budget: 5000 yuan, Product Type: Projector, Usage Scenario: Home Theater."
 
+3. **Task Planning:**
+   - `shopping-plan-agent` receives the parsed requirements and, based on predefined e-commerce platforms, generates `amazon_search`, `worldmarket_search`, etc., instructions (e.g., search keywords "home theater projector," price range 0-5000 yuan).
 
-## **六、运行程序**
+4. **Platform Queries:**
+   - `amazon-agent`, `worldmarket-agent`, etc., receive their respective search instructions and query data sources, returning corresponding projector product data (price, brand, resolution, user ratings).
 
-1. 首先进入到 `python/berkeley-hackathon/shopping_agents` 目录下 
-2. 在当前目录下创建一个文件 名字叫做`.env.secret`,结构如下
-~~~
-API_KEY=
-~~~
-3. 在当前目录下运行命令 `dora up && dora build shopping_dataflow.yml && dora start shopping_dataflow.yml --attach`
-4. 在另外一个命令端下面运行 `hitl-agent`
-5. 开启另外一个命令端,在命令行中使用`cd /mofa_berkeley_hackathon/python/berkeley-hackathon/ui && streamlit run socket_client.py` 可以看到你的页面打开了。 保证你的端口12345没有被占用，如果被占用了，使用`lsof -i :12345`来查看被占用的进程号，使用  kill -9 删除它
+5. **Plan Generation:**
+   - `shopping-solution-agent` collects results from all platforms, compares prices, performance, and user ratings, and generates 2-3 alternative plans for the user to choose, then returns them to HITL-Agent.
 
+6. **User Feedback:**
+   - If the user is not satisfied with the plans, they can provide feedback in HITL-Agent (e.g., "I希望分辨率更高一点，预算增加到6000元" → "I希望分辨率更高一点，预算增加到6000元" → "I希望分辨率更高一点，预算增加到6000元" → "I希望分辨率更高一点，预算增加到6000元"), prompting the system to re-plan and re-query until the user is satisfied.
+
+---
+
+## **5. Summary**
+
+The Intelligent Shopping Agent System offers significant advantages in modularity and scalability:
+
+- **Clear and Extensible Workflow:** The process—from user input → requirement parsing → plan planning → multi-platform querying → plan integration → user feedback—is clear and easy to extend.
+- **Diverse Data Sources:** Incorporating multiple e-commerce agents diversifies data sources, enhancing recommendation credibility and variety.
+- **Rapid Iteration Based on Feedback:** The system can quickly iterate and optimize recommendation plans based on user feedback, improving user satisfaction.
+- **Continuous Performance Optimization:** Through status outputs and monitoring mechanisms, the system's performance and stability can be continuously optimized.
+
+## **6. Running the Program**
+
+1. **Navigate to the Directory:**
+   ```bash
+   cd python/berkeley-hackathon/shopping_agents
+   ```
+2. **Create `.env.secret` File:**
+   In the current directory, create a file named `.env.secret` with the following structure:
+   ```env
+   API_KEY=
+   ```
+3. **Run Backend Commands:**
+   ```bash
+   dora up && dora build shopping_dataflow.yml && dora start shopping_dataflow.yml --attach
+   ```
+4. **Start HITL-Agent:**
+   Open another terminal and run:
+   ```bash
+   hitl-agent
+   ```
+5. **Launch Front-end Interface:**
+   Open a third terminal and execute:
+   ```bash
+   cd /mofa_berkeley_hackathon/python/berkeley-hackathon/ui
+   streamlit run socket_client.py
+   ```
+   Your web page should open automatically. Ensure that port `12345` is not occupied. If it is, use the following commands to identify and terminate the occupying process:
+   ```bash
+   lsof -i :12345
+   kill -9 <process_id>
+   ```
+
+---
+
+## **7. Conclusion**
+
+This Intelligent Shopping Agent System leverages a modular and scalable architecture to provide personalized shopping experiences. By decomposing user requirements, coordinating multiple e-commerce agents, and integrating their data, the system efficiently generates and optimizes shopping plans. Its ability to dynamically adjust based on user feedback ensures high user satisfaction and adaptability to varying shopping needs.
