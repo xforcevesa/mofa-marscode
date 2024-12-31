@@ -51,7 +51,7 @@ class Operator:
                     if i['agent_output_name'] == dora_event['id']:
                         i['agent_status'] = True
                         i['shopping_web_result'] = load_node_result(dora_event["value"][0].as_py())
-                        print(f'{i['agent_output_name']} : ',load_node_result(dora_event["value"][0].as_py()))
+                        print(f'{i["agent_output_name"]} : ',load_node_result(dora_event["value"][0].as_py()))
             print('----- self.shopping_agent_ids : ',self.shopping_agent_ids)
             print('----- self.shopping_agents : ',self.shopping_agents)
             self.agent_ready = all(d.get('agent_status') == True for d in self.shopping_agents)

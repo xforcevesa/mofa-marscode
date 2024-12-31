@@ -25,6 +25,7 @@ class Click:
         self.node_info_lock = threading.Lock()
         self.message_lock = threading.Lock()
         self.start_server()
+        self.first_run = True
         self.thread = threading.Thread(target=Click.listen_loop, args=(self,))
         self.thread.start()
 
@@ -40,15 +41,17 @@ class Click:
 
     def input(self, prompt: str, send=True):
         if send:
-            # print(f"Sending: {self.msg}")
+            print(f"Sending: {self.msg}")
             self.send_message(self.conn, self.msg)
-            # print(f"Sent: {self.msg}")
+            print(f"Sent: {self.msg}")
+        elif not self.first_run:
+            self.send_message(self.conn, self.msg, end=True)
         else:
-            self.send_message(self.conn, self.msg)
+            self.first_run = False
         self.msg = ""
-        # print("Receiving input...")
+        print("Receiving input...")
         recv_msg = self.receive_message(self.conn)
-        # print(f"Received: {recv_msg}")
+        print(f"Received: {recv_msg}")
         return recv_msg
 
     def send_message(self, conn, message, signal=False, end=False):
