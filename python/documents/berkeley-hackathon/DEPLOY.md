@@ -6,8 +6,8 @@
 - Clone the Repository
 
 ``` shell
-git clone https://github.com/chengzi0103/mofa_berkeley_hackathon.git
-cd mofa_berkeley_hackathon
+git clone https://github.com/xforcevesa/mofa-marscode
+cd mofa-marscode
 git checkout main
 ```
 
@@ -57,7 +57,7 @@ Before running the following commands, make sure there are no important programs
 
 ```
 kill -i 12345
-cd /mofa_berkeley_hackathon/python/MoFA_marscode/ui
+cd /mofa-marscode/python/MoFA_marscode/ui
 streamlit run socket_client.py
 ```
 

@@ -117,7 +117,7 @@ The Intelligent Shopping Agent System offers significant advantages in modularit
 
 1. **Navigate to the Directory:**
    ```bash
-   cd python/berkeley-hackathon/shopping_agents
+   cd python/MoFA_marscode/shopping_agents
    ```
 2. **Create `.env.secret` File:**
    In the current directory, create a file named `.env.secret` with the following structure:
@@ -136,7 +136,7 @@ The Intelligent Shopping Agent System offers significant advantages in modularit
 5. **Launch Front-end Interface:**
    Open a third terminal and execute:
    ```bash
-   cd /mofa_berkeley_hackathon/python/berkeley-hackathon/ui
+   cd /mofa-marscode/python/MoFA_marscode/ui
    streamlit run socket_client.py
    ```
    Your web page should open automatically. Ensure that port `12345` is not occupied. If it is, use the following commands to identify and terminate the occupying process:

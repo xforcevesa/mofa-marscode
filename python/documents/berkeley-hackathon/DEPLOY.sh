@@ -2,8 +2,8 @@
 # test
 
 echo "loading..."
-git clone https://github.com/chengzi0103/mofa_berkeley_hackathon.git
-cd mofa_berkeley_hackathon
+git clone https://github.com/xforcevesa/mofa-marscode
+cd mofa-marscode
 git checkout main
 conda create -n shopping-agent python=3.10 -y
 conda activate shopping-agent
