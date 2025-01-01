@@ -44,7 +44,7 @@ cargo install dora-cli --locked
 - Start data-flow
 
 ```
-cd python/berkeley-hackathon/shopping_agents
+cd python/MoFA_marscode/shopping_agents
 echo "API_KEY=YOUR_SECRET" > .env.secret
 dora up
 dora build shopping_dataflow.yml
@@ -57,7 +57,7 @@ Before running the following commands, make sure there are no important programs
 
 ```
 kill -i 12345
-cd /mofa_berkeley_hackathon/python/berkeley-hackathon/ui
+cd /mofa_berkeley_hackathon/python/MoFA_marscode/ui
 streamlit run socket_client.py
 ```
 

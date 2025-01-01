@@ -56,9 +56,9 @@ In this branch, we introduce the MoFA framework built on Dora-RS.
      cargo install dora-cli --locked
      ```
 
-5. **Run Berkeley-Hackathon:**
+5. **Run MoFA_marscode:**
 
-   - For detailed instructions, refer to [berkeley-hackathon.md](berkeley-hackathon/shopping_agents/README.md).
+   - For detailed instructions, refer to [MoFA_marscode.md](MoFA_marscode/shopping_agents/README.md).
 
 ---
 

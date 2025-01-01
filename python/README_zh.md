@@ -47,5 +47,5 @@ https://www.rust-lang.org/tools/install
 然后安装 `cargo install dora-cli --locked`
 
 
-5. 运行 berkeley-hackathon
-详情查看 [berkeley-hackathon.md](berkeley-hackathon/shopping_agents/README.md)
+5. 运行 MoFA_marscode
+详情查看 [MoFA_marscode.md](MoFA_marscode/shopping_agents/README.md)

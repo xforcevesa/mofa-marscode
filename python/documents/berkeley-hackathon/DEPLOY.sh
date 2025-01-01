@@ -19,14 +19,14 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source "$HOME/.cargo/env"
 cargo install dora-cli --locked
 echo "Setting up environment variables..."
-cd ../python/berkeley-hackathon/shopping_agents
+cd ../python/MoFA_marscode/shopping_agents
 echo "API_KEY=YOUR_SECRET" > .env.secret
 
 echo "dataflow booting"
 dora up
 dora build shopping_dataflow.yml
 dora start shopping_dataflow.yml --attach
-cd ../../../python/berkeley-hackathon/ui
+cd ../../../python/MoFA_marscode/ui
 streamlit run socket_client.py &
 
 echo "Checking for port conflicts..."
