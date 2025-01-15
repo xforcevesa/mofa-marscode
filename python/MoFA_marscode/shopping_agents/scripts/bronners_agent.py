@@ -32,7 +32,6 @@ class Operator:
                 self.task = json.loads(load_node_result(dora_event["value"][0].as_py()))
                 llm_client = create_openai_client()
                 print('-------: ',self.task)
-                # web_search_tasks = [item for values_list in self.task.values() for item in values_list]
                 web_search_tasks = [item for values_list in self.task.values() for item in values_list]
                 for web_search_text in web_search_tasks:
                     if time.time() - t1 > self.timeout:
