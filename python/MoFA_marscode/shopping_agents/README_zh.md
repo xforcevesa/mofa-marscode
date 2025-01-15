@@ -117,7 +117,7 @@
 
 
 ## **六、运行程序**
-
+0. cd; git clone https://github.com/xforcevesa/mofa-marscode.git
 1. 首先进入到 `python/MoFA_marscode/shopping_agents` 目录下 
 2. 在当前目录下创建一个文件 名字叫做`.env.secret`,结构如下
 ~~~
@@ -125,5 +125,5 @@ API_KEY=
 ~~~
 3. 在当前目录下运行命令 `dora up && dora build shopping_dataflow.yml && dora start shopping_dataflow.yml --attach`
 4. 在另外一个命令端下面运行 `hitl-agent`
-5. 开启另外一个命令端,在命令行中使用`cd /mofa-marscode/python/MoFA_marscode/ui && streamlit run socket_client.py` 可以看到你的页面打开了。 保证你的端口12345没有被占用，如果被占用了，使用`lsof -i :12345`来查看被占用的进程号，使用  kill -9 删除它
+5. 开启另外一个命令端,在命令行中使用`cd mofa-marscode/python/MoFA_marscode/ui && streamlit run socket_client.py` 可以看到你的页面打开了。 保证你的端口12345没有被占用，如果被占用了，使用`lsof -i :12345`来查看被占用的进程号，使用  kill -9 删除它
 
