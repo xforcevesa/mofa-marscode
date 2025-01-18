@@ -25,7 +25,7 @@ class OpenAIClient:
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant. Help me with my text enhancement on shopping decision making. The output text should be in a markdown format and should have tables if necessary."},
-                {"role": "user", "content": str(prompt) + "\r\n\r\n According to the text or json above, enhance the text further. Output should be in a markdown format and should not have any other content and should not have markdown in the ``` code blocks. If we need user input, we can ask for it in the chat interface. The original content should not be changed. Only optimize the expression."}
+                {"role": "user", "content": str(prompt) + "\r\n\r\n According to the text or json above, enhance the text further. Output should be in a markdown format and should not have any other content and should not have markdown in the ``` code blocks. If we need user input, we can ask for it in the chat interface. The original content should not be changed. Only optimize the expression. If the session is ended, notify to user."}
             ],
             max_tokens=4096,
             temperature=0.9,

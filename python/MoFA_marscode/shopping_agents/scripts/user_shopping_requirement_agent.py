@@ -36,7 +36,7 @@ class Operator:
                 print('-------: ',llm_output)
                 json_data = self.user_shopping_requirement.extract_json(llm_output)
 
-                if json_data or self.local_loop_num>self.max_loop_num:
+                if json_data:
                     self.user_shopping_requirement.final_json = json_data
                     send_output("user_shopping_requirement_result",
                                 pa.array([create_agent_output(step_name='user_shopping_requirement_result',

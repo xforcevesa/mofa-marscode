@@ -37,11 +37,13 @@ class Click:
             time.sleep(0.1)
 
     def echo(self, message):
+        print(f"Echo: {message}")
         self.msg += message + "\n\n"
 
     def input(self, prompt: str, send=True):
+        print(f"Prompt: {prompt}")
         if send:
-            print(f"Sending: {self.msg}")
+            # print(f"Sending: {self.msg}")
             self.send_message(self.conn, self.msg)
             print(f"Sent: {self.msg}")
         elif not self.first_run:
@@ -113,11 +115,17 @@ def signal_handler(sig, frame):
 def click_log(event,click,node_ids:list=None):
     if node_ids is None:
         node_ids = ['user_shopping_requirement_agent_status','shopping_plan_agent_status','amazon_agent_status','bronners_agent_status','worldmarket_agent_status','minted_agent_status','balsamhill_agent_status','shopping_solution_agent_status','christmaslightsetc_agent_status','notonthehighstreet_agent_status']
+    try:
+        raise
+    except Exception as e:
+        pass
     if event['id'] in node_ids:
         node_results = json.loads(event['value'].to_pylist()[0])
         results = node_results.get('node_results')
         with click.node_info_lock:
             click.node_info = results
+    else:
+        print(f"Unexpected event ID: {event['id']}")
 
 # signal.signal(signal.SIGINT, signal_handler)
 # signal.signal(signal.SIGTERM, signal_handler)
@@ -139,6 +147,7 @@ def send_task_and_receive_data(node):
                 if event is not None:
                     click_log(event=event,click=click)
                     if shopping_requirement_status is False:
+                        click_log(event=event, click=click)
                         while True:
                             click_log(event=event, click=click)
                             if event['id'] == "user_shopping_requirement_status":
@@ -163,6 +172,7 @@ def send_task_and_receive_data(node):
                             click_log(event=event, click=click)
                             event = node.next(timeout=5000)
                     if shopping_planning_status is False:
+                        click_log(event=event, click=click)
                         while True:
                             click_log(event=event, click=click)
                             if event['id'] == "shopping_planning_status":
@@ -222,10 +232,14 @@ def send_task_and_receive_data(node):
                         click.echo(f"{node_results.get('step_name', '')}: {results} :dataflow_status", )
                     sys.stdout.flush()
                     if dataflow_end:
+                        shopping_requirement_status = False
+                        print('Dataflow End')
                         break
                     sys.stdout.flush()
                     event = node.next(timeout=5000)
                     click_log(event=event, click=click)
+                else:
+                    print('None of Events')
 def main():
 
     parser = argparse.ArgumentParser(description="Simple arrow sender")
