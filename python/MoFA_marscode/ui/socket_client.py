@@ -4,38 +4,30 @@ from types import TracebackType
 from typing import Callable
 import streamlit as st
 from mofa.utils.ai.conn import load_llm_api_key_by_env_file
-from openai import chat
+from openai import OpenAI
 import openai
 
 class OpenAIClient:
-    def __init__(self, api_key=load_llm_api_key_by_env_file(dotenv_path="../shopping_agents/.env.secret")):
+    def __init__(self, api_key=load_llm_api_key_by_env_file(dotenv_path="../shopping_agents/.env.secret.1")):
         self.api_key = api_key
+        self.client = OpenAI(
+            api_key = api_key,
+            base_url = "https://ark.cn-beijing.volces.com/api/v3",
+        )
     
     def generate_text(self, prompt):
         """Generate text using OpenAI's GPT-4 model."""
-        # Save the previous openai.api_key
-        prev_api_key = openai.api_key
-        # Set the API key
-        openai.api_key = self.api_key
         # Generate the text using OpenAI's GPT-4 model
-        import os
-        prev_env_api_key = os.environ.get("OPENAI_API_KEY", None)
-        os.environ["OPENAI_API_KEY"] = self.api_key
-        response = chat.completions.create(
-            model="gpt-4o-mini",
+        response = self.client.chat.completions.create(
+            model="ep-20250117172626-95vzs",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant. Help me with my text enhancement on shopping decision making. The output text should be in a markdown format and should have tables if necessary."},
                 {"role": "user", "content": str(prompt) + "\r\n\r\n According to the text or json above, enhance the text further. Output should be in a markdown format and should not have any other content and should not have markdown in the ``` code blocks. If we need user input, we can ask for it in the chat interface. The original content should not be changed. Only optimize the expression. If the session is ended, notify to user."}
             ],
             max_tokens=4096,
             temperature=0.9,
+            stream=False
         )
-        # Set the API key back to the previous value
-        openai.api_key = prev_api_key
-        if prev_env_api_key is not None:
-            os.environ["OPENAI_API_KEY"] = prev_env_api_key
-        else:
-            del os.environ["OPENAI_API_KEY"]
 
         response_text = ""
 
