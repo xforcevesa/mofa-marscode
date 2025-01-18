@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel,Field
 
-def load_llm_api_key_by_env_file(dotenv_path: str='.env.secret',) -> str:
+def load_llm_api_key_by_env_file(dotenv_path: str='.env.secret.1',) -> str:
     load_dotenv(dotenv_path)
     api_key = os.getenv('OPENAI_API_KEY',None)
     if api_key is None:
@@ -12,11 +12,11 @@ def load_llm_api_key_by_env_file(dotenv_path: str='.env.secret',) -> str:
     return api_key
 
 def create_openai_client(api_key: str=load_llm_api_key_by_env_file(),*args,**kwargs) -> OpenAI:
-    client = OpenAI(api_key=api_key,**kwargs)
+    client = OpenAI(api_key=api_key, base_url = "https://ark.cn-beijing.volces.com/api/v3", **kwargs)
     return client
 
 def generate_json_from_llm(client, format_class: BaseModel, prompt: str = None, messages: List[dict] = None,
-                           supplement_prompt: str = None, model_name: str = 'gpt-4o-mini') -> str:
+                           supplement_prompt: str = None, model_name: str = "ep-20250117172626-95vzs") -> str:
     if messages is None:
         messages = [
             {"role": "system",
