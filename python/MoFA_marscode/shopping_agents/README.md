@@ -136,7 +136,7 @@ The Intelligent Shopping Agent System offers significant advantages in modularit
 5. **Launch Front-end Interface:**
    Open a third terminal and execute:
    ```bash
-   cd /mofa-marscode/python/MoFA_marscode/ui
+   cd mofa-marscode/python/MoFA_marscode/ui
    streamlit run socket_client.py
    ```
    Your web page should open automatically. Ensure that port `12345` is not occupied. If it is, use the following commands to identify and terminate the occupying process:
