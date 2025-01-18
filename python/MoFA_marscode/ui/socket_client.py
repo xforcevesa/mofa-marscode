@@ -84,9 +84,17 @@ def draw_graph_at_sidebar(json_text: str = "{}"):
             [item["id"], "#800080"] for item in yaml_dict["nodes"]
         ]
 
+    if "first" not in st.session_state:
+        st.session_state["first"] = True
+
+    if "last_text" not in st.session_state:
+        st.session_state["last_text"] = ""
+
     json = eval(json_text)
     label = json["agent_name"] if "agent_name" in json else None
     status = json["agent_status"] if "agent_status" in json else None
+
+    is_changed = st.session_state["last_text"] != label
 
     if label is not None:
         for index in range(len(st.session_state["boxes"])):
@@ -97,18 +105,26 @@ def draw_graph_at_sidebar(json_text: str = "{}"):
             else:
                 st.session_state["boxes"][index][1] = "#800080"
 
-    with placeholder.container():
-        # placeholder.write(json_text)
-        # Render boxes
-        placeholder.markdown(''.join([
-            round_corner_box(
-                text=text + " - " + status \
-                    if status is not None and (text == label or text == label.replace("_", "-")) \
-                        else text + " - " + "Not Running",
-                color=color
-            )
-            for text, color in st.session_state["boxes"]
-        ]), unsafe_allow_html=True)
+    if is_changed or st.session_state["first"]:
+        st.session_state["first"] = False
+        st.session_state["last_text"] = label
+        with placeholder.container():
+            # placeholder.write(json_text)
+            # Render boxes
+            html_text = ''.join([
+                round_corner_box(
+                    text=text + " - " + status \
+                        if status is not None and (text == label or text == label.replace("_", "-")) \
+                            else text + " - " + "Not Running",
+                    color=color
+                )
+                for text, color in st.session_state["boxes"]
+            ])
+            # print(time.clock_gettime(time.CLOCK_REALTIME), html_text)
+            placeholder.markdown(html_text, unsafe_allow_html=True)
+    else:
+        pass
+        # print(time.clock_gettime(time.CLOCK_REALTIME), is_changed, st.session_state["first"], st.session_state["boxes"])
 
 def receive_message(sock):
     """Receive an arbitrary-sized string over a socket."""
