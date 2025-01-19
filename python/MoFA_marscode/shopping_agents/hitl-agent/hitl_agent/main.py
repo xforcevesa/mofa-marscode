@@ -115,10 +115,6 @@ def signal_handler(sig, frame):
 def click_log(event,click,node_ids:list=None):
     if node_ids is None:
         node_ids = ['user_shopping_requirement_agent_status','shopping_plan_agent_status','amazon_agent_status','bronners_agent_status','worldmarket_agent_status','minted_agent_status','balsamhill_agent_status','shopping_solution_agent_status','christmaslightsetc_agent_status','notonthehighstreet_agent_status']
-    try:
-        raise
-    except Exception as e:
-        pass
     if event['id'] in node_ids:
         node_results = json.loads(event['value'].to_pylist()[0])
         results = node_results.get('node_results')
